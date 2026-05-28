@@ -1,0 +1,14 @@
+# Secrets
+.env
+.env.local
+*.env
+
+# Never commit API keys
+# Utiliser .env.example comme template
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
