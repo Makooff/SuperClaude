@@ -1,65 +1,57 @@
 # SuperClaude
 
-Config Claude Code complète — skills auto-routés, MCPs (Magic, Playwright, Context7), mémoire Obsidian cross-session.
-
-Cloner dans chaque projet → tout s'active automatiquement au premier message.
-
----
-
-## Ce que ça fait concrètement
-
-Dès le premier message dans Claude Code:
-- **Obsidian injecte le contexte** — tâches ouvertes, décisions récentes, session du jour
-- **Skills se routent automatiquement** — tu écris "design" → impeccable+taste-skill+emil-design-eng s'activent
-- **MCPs actifs** — Magic (composants UI), Playwright (browser), Context7 (docs live)
-- **Mémoire cross-session** — claude-mem retient ce que Claude a fait avant
+Config Claude Code complète. Skills auto-routés, MCPs actifs, mémoire Obsidian cross-session.
+Copier dans un projet → tout fonctionne au premier message.
 
 ---
 
-## Prérequis
+## Ce que ça fait
 
+| Ce qui se passe | Comment |
+|-----------------|---------|
+| Claude connaît tes tâches en cours | Obsidian injecte `Taches.md` à chaque message |
+| Claude sait les décisions passées | Obsidian injecte `Decisions.md` automatiquement |
+| Skills s'activent seuls | Tu écris "design" → impeccable+taste-skill s'invoquent |
+| Composants UI générés | MCP Magic → `/ui generate [description]` |
+| Docs live | MCP Context7 → ajouter `use context7` dans le prompt |
+| Tests E2E + screenshots | MCP Playwright → automatique |
+
+---
+
+## SETUP MACHINE — une seule fois
+
+### Prérequis
 - [Claude Code](https://claude.ai/code) installé
-- [Obsidian](https://obsidian.md) avec le plugin **Local REST API** activé
+- [Obsidian](https://obsidian.md) + plugin **Local REST API** activé
 - Node.js installé
 
----
-
-## Installation — une seule fois par machine
-
 ### 1. Cloner SuperClaude
-
 ```powershell
 git clone https://github.com/Makooff/SuperClaude.git C:/SuperClaude
-cd C:/SuperClaude
 ```
 
 ### 2. Installer les plugins Claude Code
-
 ```powershell
+cd C:/SuperClaude
 .\setup.ps1
 ```
 
-Installe: `superpowers`, `impeccable`, `taste-skill`, `caveman`, `claude-mem`, `context7`, `playwright`.
+Installe : `superpowers` `impeccable` `taste-skill` `caveman` `claude-mem` `context7` `playwright`
 
 ### 3. Ajouter les MCP servers
-
 ```bash
-# Magic — composants UI 21st.dev (obtenir une clé sur 21st.dev)
-claude mcp add magic --scope user --env API_KEY="TA_CLÉ_21ST_DEV" -- npx -y @21st-dev/magic@latest
-
-# Playwright — browser automation
+claude mcp add magic --scope user --env API_KEY="TA_CLÉ_MAGIC" -- npx -y @21st-dev/magic@latest
 claude mcp add playwright --scope user -- npx @playwright/mcp@latest
-
-# Context7 — docs live
 claude mcp add context7 --scope user -- npx -y @upstash/context7-mcp
 ```
 
+> Clé Magic sur [21st.dev/magic/console](https://21st.dev/magic/console)
+
 ---
 
-## Ajouter SuperClaude à un projet
+## NOUVEAU PROJET — à chaque fois
 
-### Étape 1 — Copier la config
-
+### Étape 1 — Copier la config dans le projet
 ```powershell
 # Depuis la racine de ton projet
 cp -r C:/SuperClaude/.claude .
@@ -68,141 +60,145 @@ cp C:/SuperClaude/.mcp.json .
 cp C:/SuperClaude/.env.example .env.local
 ```
 
-### Étape 2 — Configurer `.env.local`
-
-Ouvrir `.env.local` et remplir:
-
+### Étape 2 — Remplir `.env.local`
 ```env
-OBSIDIAN_API_KEY=ta_clé_obsidian       # Settings > Local REST API dans Obsidian
-OBSIDIAN_VAULT=NomDuProjet             # Sous-dossier dans ton vault (ex: "NailArt")
-MAGIC_API_KEY=ta_clé_21st_dev          # Optionnel
+OBSIDIAN_API_KEY=ta_clé      # Obsidian → Settings → Local REST API → copier la clé
+OBSIDIAN_VAULT=NomDuProjet   # Nom du sous-dossier dans ton vault (ex: NailArt, Qwillio)
+MAGIC_API_KEY=ta_clé         # 21st.dev
 ```
 
 ### Étape 3 — Créer le vault Obsidian
-
-Dans Obsidian, créer ce dossier:
-
+Dans Obsidian, créer ce dossier (remplacer `NomDuProjet`) :
 ```
 NomDuProjet/
-├── Taches.md           ← liste tes tâches ici (format: - [ ] Tâche)
-├── 04 - Decisions.md   ← décisions architecturales
+├── Taches.md           ← - [ ] Tâche 1
+│                          - [ ] Tâche 2
+├── 04 - Decisions.md   ← décisions techniques
 ├── PRODUCT.md          ← contexte produit
-└── Sessions/           ← Claude loggera ici automatiquement
+└── Sessions/           ← Claude loggue ici automatiquement
 ```
 
-### Étape 4 — Ajouter `.env.local` au `.gitignore`
-
+### Étape 4 — Ignorer les secrets
 ```bash
 echo ".env.local" >> .gitignore
 ```
 
 ### Étape 5 — Ouvrir Claude Code
-
 ```
 VS Code → Open Folder → ton projet
 Ctrl+Shift+P → "Claude: New Chat"
 ```
 
-Premier message → Obsidian injecte tâches + contexte. C'est parti.
+**Premier message → Obsidian injecte le contexte. C'est parti.**
 
 ---
 
-## Exemple concret — projet NailArt
+## EXEMPLE COMPLET — projet NailArt
 
 ```powershell
-# Créer le projet
+# 1. Créer le projet
 mkdir C:/Projets/NailArt
 cd C:/Projets/NailArt
 git init
 
-# Copier la config
+# 2. Copier la config
 cp -r C:/SuperClaude/.claude .
 cp C:/SuperClaude/CLAUDE.md .
 cp C:/SuperClaude/.mcp.json .
 cp C:/SuperClaude/.env.example .env.local
 
-# Configurer
-# Éditer .env.local:
-#   OBSIDIAN_API_KEY=xxxxx
-#   OBSIDIAN_VAULT=NailArt
+# 3. Remplir .env.local
+#    OBSIDIAN_API_KEY=xxxxx
+#    OBSIDIAN_VAULT=NailArt
 
-# Ouvrir VS Code
-code .
+# 4. Ignorer les secrets
+echo ".env.local" >> .gitignore
 ```
 
-Dans Obsidian, créer `NailArt/Taches.md` avec les premières tâches.
-Ouvrir Claude Code → taper le premier message → tout est là.
+Dans Obsidian → créer `NailArt/Taches.md` avec les premières tâches.
+
+```
+VS Code → Open Folder → C:/Projets/NailArt
+Claude Code → nouveau chat → taper le premier message
+```
 
 ---
 
-## Skill routing automatique
+## SKILL ROUTING automatique
 
-| Mot dans le prompt | Skills invoqués automatiquement |
-|--------------------|----------------------------------|
-| design, UI, composant, animation, page | `impeccable` + `taste-skill` + `emil-design-eng` |
-| review, audit, check | `code-review` |
-| test, tdd | `tdd-workflow` |
-| bug, crash, erreur, debug | `systematic-debugging` |
-| auth, token, password, API key | `security` |
+| Mot dans le prompt | Skills invoqués |
+|--------------------|-----------------|
+| design, UI, composant, animation, page, layout | `impeccable` + `taste-skill` + `emil-design-eng` |
+| review, audit, check, revu | `code-review` |
+| test, tdd, coverage | `tdd-workflow` |
+| bug, crash, erreur, debug, plante | `systematic-debugging` |
+| auth, token, password, API key, sécurité | `security` |
 | plan, feature, architecture | `writing-plans` |
 
----
-
-## MCP servers inclus
-
-| Serveur | Comment l'utiliser |
-|---------|-------------------|
-| `magic` | Taper `/ui generate [description du composant]` |
-| `playwright` | Automatique pour tests E2E et screenshots |
-| `context7` | Ajouter `use context7` dans le prompt = docs live à jour |
-
-Exemple avec Framer Motion:
-```
-Anime cette card avec Framer Motion. use context7 pour les APIs.
-Easing: cubic-bezier(0.16, 1, 0.3, 1). Stagger 50ms. Press: scale(0.97).
-```
+Rien à faire — les skills s'invoquent selon les mots détectés dans le prompt.
 
 ---
 
-## Mémoire Obsidian — comment ça marche
+## MCP SERVERS
+
+### Magic — générer un composant UI
+```
+/ui generate une card produit avec image, titre, prix et bouton ajouter au panier
+```
+
+### Context7 — docs live
+Ajouter `use context7` dans n'importe quel prompt :
+```
+Anime cette card avec Framer Motion. use context7 pour les APIs à jour.
+```
+
+### Playwright — browser automation
+Automatique pour les tests E2E. Exemple de prompt :
+```
+Vérifie que le formulaire de login fonctionne avec Playwright.
+```
+
+---
+
+## MÉMOIRE OBSIDIAN — schéma
 
 ```
 Tu envoies un message
-        ↓
-Hook déclenche obsidian.js
-        ↓
-Lit Taches.md + Sessions/aujourd'hui.md + Decisions.md + PRODUCT.md
-        ↓
-Injecte dans Claude AVANT qu'il réponde
-        ↓
-Claude sait où tu en es sans réexpliquer
+       ↓
+Hook déclenche .claude/scripts/obsidian.js
+       ↓
+Lit : Taches.md + Sessions/aujourd'hui.md + Decisions.md + PRODUCT.md
+       ↓
+Injecte tout dans Claude AVANT qu'il réponde
+       ↓
+Claude sait où tu en es — sans réexpliquer
 ```
 
-**Obsidian doit être ouvert** sur la machine. Si fermé → Claude démarre sans contexte, session normale.
+Fin de session → Claude loggue automatiquement dans `Sessions/YYYY-MM-DD.md`.
 
-À la fin de chaque session, Claude loggue automatiquement dans `Sessions/YYYY-MM-DD.md`.
+> **Obsidian doit être ouvert.** Si fermé → Claude démarre sans contexte (session normale, pas de plantage).
 
 ---
 
-## Structure du repo
+## STRUCTURE DU REPO
 
 ```
 SuperClaude/
-├── CLAUDE.md                    # Skill routing + instructions Claude
-├── .mcp.json                    # MCP servers projet
-├── .env.example                 # Template secrets (copier en .env.local)
-├── setup.ps1                    # Install plugins — une fois par machine
+├── CLAUDE.md                  ← instructions + skill routing
+├── .mcp.json                  ← MCP servers (magic, playwright, context7)
+├── .env.example               ← template secrets → copier en .env.local
+├── setup.ps1                  ← install plugins (une fois par machine)
 ├── .claude/
-│   ├── settings.json            # Hooks auto-skill + plugins activés
+│   ├── settings.json          ← hooks auto-skill + plugins activés
 │   └── scripts/
-│       └── obsidian.js          # Bridge Obsidian REST API
+│       └── obsidian.js        ← bridge Obsidian REST API
 └── docs/
-    ├── prompts.md               # Prompts prêts à copier par type de tâche
-    └── obsidian-setup.md        # Guide détaillé config Obsidian
+    ├── prompts.md             ← prompts prêts par type de tâche
+    └── obsidian-setup.md      ← guide détaillé Obsidian
 ```
 
 ---
 
-## Prompts utiles
+## PROMPTS PRÊTS
 
-Voir [docs/prompts.md](docs/prompts.md) — prompts prêts par type: démarrage session, feature UI, debug, Framer Motion, Magic MCP, code review.
+Voir [docs/prompts.md](docs/prompts.md) — prompts par type : démarrage session, feature UI, debug, Framer Motion, Magic, code review.
