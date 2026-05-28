@@ -12,3 +12,5 @@ Thumbs.db
 
 # Node
 node_modules/
+.env.local
+MESCLES.md
