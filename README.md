@@ -1,138 +1,114 @@
-# SuperClaude — Setup de session Claude Code
+# SuperClaude
 
-Config complète pour lancer Claude avec mémoire Obsidian, skills, agents et MCP prêts.
+Config Claude Code complète — skills, MCPs, mémoire Obsidian. Cloner dans chaque projet, tout s'active automatiquement.
 
-## Ce que ça inclut
+## Ce que ça donne
 
-| Composant | Ce que ça fait |
-|-----------|----------------|
-| **Skills** (superpowers, impeccable, taste-skill, caveman...) | Intelligence spécialisée par tâche |
-| **MCP: Magic** | Génération de composants UI 21st.dev |
-| **MCP: Playwright** | Tests E2E + screenshot browser |
-| **MCP: Context7** | Docs à jour pour toute librairie |
-| **MCP: claude-mem** | Mémoire persistante entre sessions |
-| **Obsidian** | Source de vérité projet — journal + tâches |
-| **Hooks auto** | Skill routing automatique selon le prompt |
+Dès le premier message dans Claude Code:
+- **Context Obsidian injecté** — tâches ouvertes, décisions récentes, session du jour
+- **Skills auto-routés** — design → impeccable+taste-skill, bug → systematic-debugging, etc.
+- **MCPs actifs** — magic (UI), playwright (browser), context7 (docs live)
+- **Mémoire cross-session** via claude-mem plugin
 
 ---
 
-## Installation rapide
+## Usage — par projet
 
-### 1. Cloner ce repo
-
+### 1. Copier ce repo dans ton projet
 ```bash
-git clone https://github.com/Makooff/SuperClaude.git
-cd SuperClaude
+# Option A: cloner directement
+git clone https://github.com/Makooff/SuperClaude.git MonProjet
+cd MonProjet
+
+# Option B: copier les fichiers dans un projet existant
+cp -r SuperClaude/.claude MonProjet/
+cp SuperClaude/CLAUDE.md MonProjet/
+cp SuperClaude/.mcp.json MonProjet/
+cp SuperClaude/.env.example MonProjet/
 ```
 
-### 2. Lancer le setup (Windows PowerShell)
+### 2. Configurer le projet
+```bash
+cp .env.example .env.local
+# Editer .env.local:
+#   OBSIDIAN_API_KEY=ta_clé
+#   OBSIDIAN_VAULT=NomDuProjet   (sous-dossier dans ton vault Obsidian)
+```
+
+### 3. Ouvrir Claude Code
+```bash
+claude
+```
+Premier message → contexte Obsidian injecté automatiquement.
+
+---
+
+## Setup machine (une seule fois)
 
 ```powershell
 .\setup.ps1
 ```
 
-Le script copie settings.json, les scripts et rules dans `~/.claude/`.
+Installe: superpowers, impeccable, taste-skill, caveman, claude-mem, context7, playwright.
 
-### 3. Ajouter les MCPs
-
+Puis ajouter Magic MCP:
 ```bash
-# Magic UI components (21st.dev)
-claude mcp add magic --scope user --env API_KEY="VOTRE_KEY" -- npx -y @21st-dev/magic@latest
-
-# Playwright (browser automation)
-claude mcp add playwright --scope user -- npx @playwright/mcp@latest
-
-# Context7 (live docs)
-claude mcp add context7 --scope user -- npx -y @upstash/context7-mcp
-```
-
-### 4. Installer les plugins Claude Code
-
-```bash
-claude plugin install superpowers
-claude plugin install impeccable
-claude plugin install taste-skill
-claude plugin install claude-mem
-claude plugin install caveman
-claude plugin install context7
-claude plugin install playwright
-claude plugin install vercel
-```
-
-### 5. Copier obsidian.js
-
-```powershell
-copy scripts\obsidian.js $env:USERPROFILE\.claude\scripts\obsidian.js
+claude mcp add magic --scope user --env API_KEY="TA_CLÉ" -- npx -y @21st-dev/magic@latest
 ```
 
 ---
 
-## Structure du projet
+## Structure
 
 ```
 SuperClaude/
-├── README.md
-├── setup.ps1              # Script d'installation Windows
-├── CLAUDE.md              # Instructions globales pour Claude
-├── settings.json          # Config Claude (template sans secrets)
-├── .mcp.json              # MCP servers (projet)
-├── scripts/
-│   └── obsidian.js        # Bridge Obsidian REST API
+├── CLAUDE.md                    # Skill routing + instructions globales
+├── .mcp.json                    # MCP servers (magic, playwright, context7)
+├── .env.example                 # Template secrets
+├── setup.ps1                    # Install plugins machine (one-time)
+├── .claude/
+│   ├── settings.json            # Hooks auto-skill + plugins activés
+│   └── scripts/
+│       └── obsidian.js          # Bridge Obsidian REST API
 └── docs/
-    ├── skills.md           # Guide skill routing
-    ├── mcp-guide.md        # Guide MCP servers
-    ├── obsidian-setup.md   # Setup mémoire Obsidian
-    └── prompts.md          # Prompts de démarrage session
+    ├── prompts.md               # Prompts de démarrage session
+    └── obsidian-setup.md        # Guide config mémoire Obsidian
 ```
 
 ---
 
-## Démarrer une session
+## Skill routing automatique
 
-Coller ce prompt dans Claude Code au début de chaque session :
-
-```
-Nouvelle session. Lis le vault Obsidian via `node --no-warnings "C:/Users/matpo/.claude/scripts/obsidian.js" read "Qwillio/Taches.md"` pour voir les tâches ouvertes. Ensuite consulte les dernières décisions dans "Qwillio/04 - Decisions.md". Dis-moi ce qui est en cours et ce qu'on a prévu.
-```
-
-Voir `docs/prompts.md` pour les prompts par type de tâche.
-
----
-
-## Skills clés
-
-| Trigger | Skill(s) invoqué(s) |
-|---------|---------------------|
-| Design, UI, composant, page | `impeccable` + `taste-skill` + `emil-design-eng` |
-| Code review | `code-review` |
-| Bug, crash, erreur | `systematic-debugging` |
-| Test, TDD | `tdd-workflow` |
-| Feature complexe | `writing-plans` → `executing-plans` |
-| Sécurité, auth | `security` |
-| Vérification | `verify` |
+| Mot dans le prompt | Skills invoqués |
+|--------------------|-----------------|
+| design, UI, composant, animation | `impeccable` + `taste-skill` + `emil-design-eng` |
+| review, audit, check | `code-review` |
+| test, tdd | `tdd-workflow` |
+| bug, crash, erreur, debug | `systematic-debugging` |
+| auth, token, password, API key | `security` |
+| plan, feature, architecture | `writing-plans` |
 
 ---
 
-## MCP servers actifs
+## MCP servers
 
-| Serveur | Usage |
-|---------|-------|
-| `magic` | `/ui generate Button` — composants UI from 21st.dev |
-| `playwright` | Browser automation, screenshots, E2E |
-| `context7` | `use context7` dans le prompt = docs live |
-| `claude-mem` | Mémoire cross-session automatique |
-| `vercel` | Deploy, logs, env vars |
-| `supabase` | DB queries, migrations |
-| `stripe` | Paiements, test cards |
+| Serveur | Commande | Usage |
+|---------|---------|-------|
+| `magic` | `/ui generate [description]` | Composants UI 21st.dev |
+| `playwright` | automatique | Browser automation, E2E, screenshots |
+| `context7` | ajouter `use context7` au prompt | Docs live pour toute librairie |
 
 ---
 
 ## Framer Motion
 
-Context7 connaît Framer Motion. Dans chaque prompt d'animation :
+```
+Anime [composant]. use context7 pour les APIs Framer Motion.
+Easing: cubic-bezier(0.16, 1, 0.3, 1). Stagger: 50ms. Press: scale(0.97).
+```
 
-```
-Utilise context7 pour les dernières APIs Framer Motion.
-Anime avec motion.div, variants, et useAnimation.
-Easing: cubic-bezier(0.16, 1, 0.3, 1) — ease-out-expo.
-```
+---
+
+## Prompts de démarrage
+
+Voir [docs/prompts.md](docs/prompts.md) pour les prompts par type de tâche.

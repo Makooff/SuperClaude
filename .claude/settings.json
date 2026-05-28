@@ -14,7 +14,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node --no-warnings \"C:/Users/matpo/.claude/scripts/obsidian.js\" inject-context"
+            "command": "node --no-warnings \"$CLAUDE_PROJECT_DIR/.claude/scripts/obsidian.js\" inject-context"
           }
         ]
       },
@@ -34,7 +34,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node --no-warnings \"C:/Users/matpo/.claude/scripts/obsidian.js\" session-log Qwillio"
+            "command": "node --no-warnings \"$CLAUDE_PROJECT_DIR/.claude/scripts/obsidian.js\" session-log"
           }
         ]
       }

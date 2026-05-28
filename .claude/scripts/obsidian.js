@@ -7,6 +7,7 @@
  *   OBSIDIAN_API_KEY   — bearer token from Local REST API plugin
  *   OBSIDIAN_API_HOST  — default 127.0.0.1
  *   OBSIDIAN_API_PORT  — default 27124
+ *   OBSIDIAN_VAULT     — vault subfolder prefix (e.g. "Qwillio" or "MyProject")
  */
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -57,14 +58,18 @@ function now() {
 }
 
 function detectProject() {
-  const cwd = process.cwd();
-  if (/[\\\/](Qwillio|Pulse)[\\\/]?/i.test(cwd)) return 'Qwillio';
+  // 1. Explicit env var (set in .env.local or settings.json env)
+  if (process.env.OBSIDIAN_VAULT) return process.env.OBSIDIAN_VAULT;
+
+  // 2. Detect from CLAUDE.md project name
+  const cwd = process.env.CLAUDE_PROJECT_DIR || process.cwd();
   const claudeMd = path.join(cwd, 'CLAUDE.md');
   if (fs.existsSync(claudeMd)) {
     const content = fs.readFileSync(claudeMd, 'utf8');
     const match = content.match(/^#\s+(.+)/m);
     if (match) return match[1].trim().split(' ')[0];
   }
+
   return null;
 }
 
@@ -85,7 +90,6 @@ async function main() {
   } else if (cmd === 'append') {
     const [notePath, ...rest] = args;
     const content = rest.join(' ');
-    // POST = append in Obsidian Local REST API
     const r = await apiRequest('POST', notePath, '\n' + content);
     process.stdout.write(r.status < 300 ? 'OK\n' : `Error ${r.status}: ${r.body}\n`);
 
@@ -95,25 +99,20 @@ async function main() {
     process.stdout.write(r.body + '\n');
 
   } else if (cmd === 'session-log') {
-    // Called by Stop hook — appends timestamp to today's session note
     const project = args[0] || detectProject() || 'Unknown';
     const sessionPath = `${project}/Sessions/${today()}.md`;
     const header = `# Session ${today()}\n\n`;
     const entry = `\n---\n_Session terminee a ${now()} — ${new Date().toLocaleDateString('fr-FR')}_\n`;
 
-    // Check if note exists
     const existing = await apiRequest('GET', sessionPath);
     if (existing.status === 404) {
-      // Create new note
       await apiRequest('PUT', sessionPath, header + entry);
     } else {
-      // Append
       await apiRequest('POST', sessionPath, entry);
     }
     process.stdout.write(`Session log updated: ${sessionPath}\n`);
 
   } else if (cmd === 'inject-context') {
-    // Called by UserPromptSubmit hook — outputs context for Claude
     const project = args[0] || detectProject();
     if (!project) { process.exit(0); }
 
@@ -140,14 +139,14 @@ async function main() {
       output.push(`[MEMOIRE — Session ${today()}]\n${preview}`);
     }
 
-    // 3. Recent decisions (always inject, first 20 lines)
+    // 3. Recent decisions
     const decisions = await apiRequest('GET', `${project}/04 - Decisions.md`);
     if (decisions.status === 200) {
       const preview = decisions.body.split('\n').slice(0, 20).join('\n');
       output.push(`[MEMOIRE — Decisions recentes]\n${preview}`);
     }
 
-    // 4. Product context summary (first 30 lines of PRODUCT.md)
+    // 4. Product context
     const product = await apiRequest('GET', `${project}/PRODUCT.md`);
     if (product.status === 200) {
       const preview = product.body.split('\n').slice(0, 30).join('\n');
@@ -166,5 +165,5 @@ async function main() {
 
 main().catch(e => {
   process.stderr.write(e.message + '\n');
-  process.exit(0); // exit 0 so hooks never block Claude
+  process.exit(0);
 });

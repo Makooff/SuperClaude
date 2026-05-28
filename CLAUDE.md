@@ -1,80 +1,77 @@
-# SuperClaude — Instructions globales
-
-## Stack Qwillio
-React 19, TypeScript, Vite, Tailwind CSS, Framer Motion, Recharts, React Router v7, Zustand.
-Backend: Node.js/Express (Render). Frontend: Vercel.
-Brand: Indigo `oklch(56% 0.22 264)` + Violet `oklch(67% 0.26 299)`. Font: Outfit.
+# Claude Code — Config de session
 
 ## Skill Routing automatique
 
 ### Design (UI, pages, composants, animations)
-TOUJOURS invoquer ces 3 skills avant tout travail design :
+TOUJOURS invoquer ces 3 skills avant tout travail design:
 - `Skill(impeccable)`
 - `Skill(taste-skill)`
 - `Skill(emil-design-eng)`
 
-Triggers: design, page, composant, component, UI, landing, dashboard, redesign, style, layout, couleur, animation, hero, card, button
+Triggers: design, page, composant, component, UI, landing, dashboard, redesign, style, layout, couleur, animation, hero, card, button, font, refaire
 
 ### Code review
-`Skill(code-review)` — après chaque modification de code.
+`Skill(code-review)` — après chaque modification de code, avant chaque commit.
 
 ### Tests / TDD
-`Skill(tdd-workflow)` — nouvelle feature, bug fix, "test".
+`Skill(tdd-workflow)` — nouvelle feature, bug fix, "test", "tdd".
 
 ### Debugging
-`Skill(systematic-debugging)` — erreur, crash, bug.
+`Skill(systematic-debugging)` — erreur, crash, bug, "debug", "plante".
 
 ### Sécurité
-`Skill(security)` — auth, token, password, API key.
+`Skill(security)` — auth, token, password, API key, paiements.
 
-### Planning
-`Skill(writing-plans)` → `Skill(executing-plans)` — feature complexe.
+### Planning feature complexe
+`Skill(writing-plans)` → `Skill(executing-plans)` — multi-fichiers, architecture.
 
-### Vérification
-`Skill(verify)` — avant deploy, "check", "qa".
+### Vérification / QA
+`Skill(verify)` — avant deploy, "check", "qa", "verif".
+
+---
 
 ## Mémoire Obsidian
 
-Vault: `C:\Users\matpo\Documents\Spram\Spram\Qwillio\`
+Vault: défini par `OBSIDIAN_VAULT` dans `.env.local` (ex: `MonProjet`).
 
 Lire les tâches:
-```powershell
-node --no-warnings "C:/Users/matpo/.claude/scripts/obsidian.js" read "Qwillio/Taches.md"
+```bash
+node --no-warnings ".claude/scripts/obsidian.js" read "$OBSIDIAN_VAULT/Taches.md"
 ```
 
-Après chaque action significative, logger dans Obsidian:
-```powershell
-node --no-warnings "C:/Users/matpo/.claude/scripts/obsidian.js" append "Qwillio/Sessions/YYYY-MM-DD.md" "## HH:MM — [action]\n[details]"
+Logger une action:
+```bash
+node --no-warnings ".claude/scripts/obsidian.js" append "$OBSIDIAN_VAULT/Sessions/YYYY-MM-DD.md" "## HH:MM — [action]\n[details]"
 ```
 
-## Design System tokens
+Le hook `UserPromptSubmit` injecte automatiquement le contexte Obsidian à chaque message.
 
-```css
---q-bg:       oklch(8% 0.009 265)
---q-accent:   oklch(56% 0.22 264)
---q-violet:   oklch(67% 0.26 299)
---q-text:     oklch(95% 0.004 265)
---ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1)
-```
+---
 
-## Interdictions absolues
-- Pas de gradient text (`background-clip: text`)
-- Pas de `transition-all` (utiliser `transition-colors`, `transition-opacity`)
-- Pas de Inter (utiliser Outfit)
-- Pas de tiret em (utiliser virgule, deux-points, parenthèses)
-- Pas de glassmorphism par défaut
-- Pas de modal comme première solution
+## MCP disponibles
+
+- `magic` — `/ui generate [description]` pour composants 21st.dev
+- `playwright` — browser automation, screenshots, E2E
+- `context7` — ajouter `use context7` dans le prompt = docs live
+
+---
 
 ## Framer Motion
-Toujours utiliser context7 pour les APIs Framer Motion à jour.
+
+Toujours utiliser context7 pour les APIs à jour.
 Easing par défaut: `cubic-bezier(0.16, 1, 0.3, 1)`.
 Press feedback: `scale(0.97)` on `:active`. Stagger: 30-80ms.
 
-## MCP disponibles
-- `magic` — composants UI (@21st-dev)
-- `playwright` — browser automation
-- `context7` — docs live (ajouter "use context7" dans le prompt)
-- `claude-mem` — mémoire cross-session
+---
+
+## Interdictions absolues (design)
+- Pas de gradient text (`background-clip: text`)
+- Pas de `transition-all` (utiliser `transition-colors`, `transition-opacity`)
+- Pas de Inter font (utiliser Outfit ou la font du projet)
+- Pas de glassmorphism par défaut
+- Pas de modal comme première solution
+
+---
 
 ## Commits
 ```
