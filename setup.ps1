@@ -17,9 +17,9 @@ Write-Host "  OK: plugins installes" -ForegroundColor Green
 Write-Host "`n[2/2] MCPs a ajouter (copier-coller les commandes):" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "  # Remplacer VOTRE_MAGIC_KEY par ta cle 21st.dev" -ForegroundColor Gray
-Write-Host "  claude mcp add magic --scope user --env API_KEY=`"VOTRE_MAGIC_KEY`" -- npx -y @21st-dev/magic@latest" -ForegroundColor Cyan
+Write-Host "  claude mcp add magic --scope user --env API_KEY=`"VOTRE_MAGIC_KEY`" -- npx @21st-dev/magic@latest" -ForegroundColor Cyan
 Write-Host "  claude mcp add playwright --scope user -- npx @playwright/mcp@latest" -ForegroundColor Cyan
-Write-Host "  claude mcp add context7 --scope user -- npx -y @upstash/context7-mcp" -ForegroundColor Cyan
+Write-Host "  claude mcp add context7 --scope user -- npx @upstash/context7-mcp" -ForegroundColor Cyan
 
 Write-Host "`n=== Setup termine ===" -ForegroundColor Green
 Write-Host ""
