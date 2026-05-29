@@ -5,24 +5,30 @@ Un script, un projet bootstrappé, premier message opérationnel.
 
 ---
 
-## Install machine (une fois)
+## Install — une fois par machine
 
 ### Windows
-```powershell
-git clone https://github.com/Makooff/SuperClaude.git C:/SuperClaude
-cd C:/SuperClaude
-.\setup.ps1
-```
+1. [Télécharger SuperClaude.zip](https://github.com/Makooff/SuperClaude/archive/refs/heads/main.zip)
+2. Extraire le ZIP
+3. Double-cliquer sur `SuperClaude-Installer.ps1` → **Exécuter avec PowerShell**
+4. Cliquer sur **Installer** — Claude Code s'ouvre automatiquement
 
 ### Mac / Linux
-```bash
-git clone https://github.com/Makooff/SuperClaude.git ~/SuperClaude
-cd ~/SuperClaude
-chmod +x setup.sh new-project.sh
-./setup.sh
-```
+1. [Télécharger SuperClaude.zip](https://github.com/Makooff/SuperClaude/archive/refs/heads/main.zip)
+2. Extraire le ZIP
+3. Dans Terminal :
+   ```bash
+   chmod +x SuperClaude-Installer.command
+   ./SuperClaude-Installer.command
+   ```
 
-Le script vérifie Node.js et Claude Code, installe les plugins, demande la Magic API key et configure les MCP servers.
+> **Alternativement** — installation via git :
+> ```bash
+> # Windows
+> git clone https://github.com/Makooff/SuperClaude.git C:/SuperClaude && cd C:/SuperClaude && .\setup.ps1
+> # Mac/Linux
+> git clone https://github.com/Makooff/SuperClaude.git ~/SuperClaude && cd ~/SuperClaude && chmod +x setup.sh && ./setup.sh
+> ```
 
 ---
 
@@ -96,13 +102,15 @@ Vérifie que le formulaire de login fonctionne avec Playwright.
 
 ```
 SuperClaude/
-├── CLAUDE.md                  ← instructions + skill routing
-├── .mcp.json                  ← MCP servers (magic, playwright, context7)
-├── .env.example               ← template secrets → copier en .env.local
-├── setup.ps1                  ← install machine Windows
-├── setup.sh                   ← install machine Mac/Linux
-├── new-project.ps1            ← bootstrap projet Windows
-├── new-project.sh             ← bootstrap projet Mac/Linux
+├── CLAUDE.md                       ← instructions + skill routing
+├── .mcp.json                       ← MCP servers (magic, playwright, context7)
+├── .env.example                    ← template secrets → copier en .env.local
+├── SuperClaude-Installer.ps1       ← installeur GUI WPF Windows (double-clic)
+├── SuperClaude-Installer.command   ← installeur terminal Mac (double-clic)
+├── setup.ps1                       ← install machine Windows (CLI)
+├── setup.sh                        ← install machine Mac/Linux (CLI)
+├── new-project.ps1                 ← bootstrap projet Windows
+├── new-project.sh                  ← bootstrap projet Mac/Linux
 ├── .claude/
 │   ├── settings.json          ← hooks auto-skill + plugins activés
 │   └── scripts/
