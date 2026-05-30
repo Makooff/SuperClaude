@@ -12,9 +12,12 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag (ex: v1.0.0)'
+        description: 'Version (ex: v1.0.0)'
         required: false
         default: 'v1.0.0'
+
+permissions:
+  contents: write
 
 jobs:
   build-windows:
@@ -22,44 +25,56 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+
       - name: Install dependencies
         working-directory: installer-app
-        run: npm install
+        run: npm install --legacy-peer-deps
+
       - name: Build Windows
         working-directory: installer-app
         run: npm run build-win
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+          ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+          ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+
+      - uses: actions/upload-artifact@v4
         with:
           name: windows-exe
           path: installer-app/dist/*.exe
+          if-no-files-found: error
 
   build-macos:
     name: Build macOS (.dmg)
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+
       - name: Install dependencies
         working-directory: installer-app
-        run: npm install
+        run: npm install --legacy-peer-deps
+
       - name: Build macOS
         working-directory: installer-app
         run: npm run build-mac
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+          ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+          ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+
+      - uses: actions/upload-artifact@v4
         with:
           name: macos-dmg
           path: installer-app/dist/*.dmg
+          if-no-files-found: error
 
   release:
     name: Create GitHub Release
@@ -67,46 +82,43 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Download Windows artifact
-        uses: actions/download-artifact@v4
+
+      - uses: actions/download-artifact@v4
         with:
           name: windows-exe
           path: dist/
-      - name: Download macOS artifact
-        uses: actions/download-artifact@v4
+
+      - uses: actions/download-artifact@v4
         with:
           name: macos-dmg
           path: dist/
-      - name: Set release tag
-        id: tag
+
+      - name: Set release info
+        id: info
         run: |
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-            echo "name=SuperClaude ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            TAG="${GITHUB_REF_NAME}"
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "tag=${{ inputs.version }}" >> $GITHUB_OUTPUT
-            echo "name=SuperClaude ${{ inputs.version }}" >> $GITHUB_OUTPUT
+            TAG="${{ inputs.version }}"
           else
-            echo "tag=latest" >> $GITHUB_OUTPUT
-            echo "name=SuperClaude — latest build" >> $GITHUB_OUTPUT
+            TAG="latest"
           fi
-      - name: Create Release
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "name=SuperClaude $TAG" >> $GITHUB_OUTPUT
+
+      - name: Create or update release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.tag.outputs.tag }}
-          name: ${{ steps.tag.outputs.name }}
+          tag_name: ${{ steps.info.outputs.tag }}
+          name: ${{ steps.info.outputs.name }}
+          prerelease: ${{ steps.info.outputs.tag == 'latest' }}
           body: |
             ## SuperClaude Installer
 
-            ### ⬇️ Télécharger
-            | Plateforme | Fichier |
-            |------------|---------|
-            | **Windows** | `.exe` — double-cliquer pour installer |
-            | **Mac** | `.dmg` — ouvrir → glisser dans Applications |
+            | Plateforme | Fichier | Instructions |
+            |------------|---------|--------------|
+            | **Windows** | `.exe` | Double-cliquer → Installer |
+            | **Mac** | `.dmg` | Ouvrir → glisser dans Applications |
 
-            L'installeur configure automatiquement Claude Code : plugins, MCP servers, hooks Obsidian.
+            Configure automatiquement : plugins Claude Code, MCP servers (Magic, Playwright, Context7), hooks Obsidian.
           files: dist/*
-          draft: false
-          prerelease: ${{ steps.tag.outputs.tag == 'latest' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
