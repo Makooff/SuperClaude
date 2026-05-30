@@ -156,72 +156,75 @@ $installButton = $window.FindName('InstallButton')
 $openButton    = $window.FindName('OpenClaudeButton')
 $logScroll     = $window.FindName('LogScroll')
 
-# Steps: label + command
+# Steps as strings — no ScriptBlocks in background thread
 $steps = @(
-    @{ Label = "Verification Node.js...";      Cmd = { node --version 2>&1 } }
-    @{ Label = "Verification Claude Code...";  Cmd = { claude --version 2>&1 } }
-    @{ Label = "Plugin code-review...";        Cmd = { claude plugin install code-review 2>&1 } }
-    @{ Label = "Plugin superpowers...";        Cmd = { claude plugin install superpowers 2>&1 } }
-    @{ Label = "Plugin impeccable...";         Cmd = { claude plugin install impeccable 2>&1 } }
-    @{ Label = "Plugin taste-skill...";        Cmd = { claude plugin install taste-skill 2>&1 } }
-    @{ Label = "Plugin playwright...";         Cmd = { claude plugin install playwright 2>&1 } }
-    @{ Label = "MCP context7...";             Cmd = { claude mcp add context7 --scope user -- npx -y @upstash/context7-mcp 2>&1 } }
-    @{ Label = "MCP playwright...";           Cmd = { claude mcp add playwright --scope user -- npx @playwright/mcp@latest 2>&1 } }
+    @{ Label = "Verification Node.js...";     Cmd = "node --version" }
+    @{ Label = "Verification Claude Code..."; Cmd = "claude --version" }
+    @{ Label = "Plugin code-review...";       Cmd = "claude plugin install code-review" }
+    @{ Label = "Plugin superpowers...";       Cmd = "claude plugin install superpowers" }
+    @{ Label = "Plugin impeccable...";        Cmd = "claude plugin install impeccable" }
+    @{ Label = "Plugin taste-skill...";       Cmd = "claude plugin install taste-skill" }
+    @{ Label = "Plugin playwright...";        Cmd = "claude plugin install playwright" }
+    @{ Label = "MCP context7...";            Cmd = "claude mcp add context7 --scope user -- npx -y @upstash/context7-mcp" }
+    @{ Label = "MCP playwright...";          Cmd = "claude mcp add playwright --scope user -- npx @playwright/mcp@latest" }
 )
 
-$worker = [System.ComponentModel.BackgroundWorker]::new()
-$worker.WorkerReportsProgress = $true
+# Synchronized hashtable for cross-thread communication
+$sync = [hashtable]::Synchronized(@{
+    Log      = ""
+    Progress = 0
+    Done     = $false
+    Failed   = $false
+})
 
-$worker.add_DoWork({
-    param($sender, $e)
-    # Attach a runspace so ScriptBlocks can execute on this thread
-    $rs = [System.Management.Automation.Runspaces.RunspaceFactory]::CreateRunspace()
-    $rs.Open()
-    [System.Management.Automation.Runspaces.Runspace]::DefaultRunspace = $rs
-
-    $allSteps = $e.Argument
-    for ($i = 0; $i -lt $allSteps.Count; $i++) {
-        $step = $allSteps[$i]
-        $sender.ReportProgress($i, $step.Label)
+# PowerShell instance with its own runspace — no Runspace error
+$ps = [powershell]::Create()
+[void]$ps.AddScript({
+    param($sync, $steps)
+    for ($i = 0; $i -lt $steps.Count; $i++) {
+        $step = $steps[$i]
+        $sync.Progress = $i
+        $sync.Log += "$($step.Label)`n"
         try {
-            $out = (& $step.Cmd) -join " "
-            $sender.ReportProgress($i, "[OK] $($step.Label)")
+            $out = cmd /c "$($step.Cmd)" 2`>`&1
+            $sync.Log += "[OK] $($step.Label)`n"
         } catch {
-            $sender.ReportProgress($i, "[WARN] $($step.Label): $_")
+            $sync.Log += "[WARN] $($step.Label): $_`n"
         }
-        Start-Sleep -Milliseconds 400
+        Start-Sleep -Milliseconds 300
     }
-    $rs.Close()
+    $sync.Done = $true
 })
+[void]$ps.AddArgument($sync)
+[void]$ps.AddArgument($steps)
 
-$worker.add_ProgressChanged({
-    param($sender, $e)
-    $msg = $e.UserState
-    $ts  = Get-Date -Format "HH:mm:ss"
-    $logBox.Text += "[$ts] $msg`n"
+# DispatcherTimer polls sync hashtable and updates UI (stays on UI thread)
+$timer = [System.Windows.Threading.DispatcherTimer]::new()
+$timer.Interval = [System.TimeSpan]::FromMilliseconds(150)
+$timer.add_Tick({
+    $logBox.Text = $sync.Log
     $logScroll.ScrollToEnd()
-    $progressBar.Value = $e.ProgressPercentage
-    $statusLabel.Text  = $msg
-})
-
-$worker.add_RunWorkerCompleted({
-    param($sender, $e)
-    if ($e.Error) {
-        $logBox.Text  += "[ERREUR] $($e.Error.Message)`n"
-        $statusLabel.Text = "Erreur - voir log"
-    } else {
-        $logBox.Text  += "`n[OK] Installation terminee !`n"
-        $statusLabel.Text = "Installation terminee !"
+    $progressBar.Value = [Math]::Min($sync.Progress, 9)
+    if ($sync.Done) {
+        $timer.Stop()
         $progressBar.Value = 9
-        $openButton.Visibility = [System.Windows.Visibility]::Visible
+        $statusLabel.Text  = "Installation terminee !"
+        $logBox.Text      += "`n[OK] Installation terminee !`n"
+        $openButton.Visibility   = [System.Windows.Visibility]::Visible
+        $installButton.IsEnabled = $true
+        $ps.Dispose()
     }
-    $installButton.IsEnabled = $true
 })
 
 $installButton.Add_Click({
     $installButton.IsEnabled = $false
-    $logBox.Text = ""
-    $worker.RunWorkerAsync($steps)
+    $sync.Log      = ""
+    $sync.Progress = 0
+    $sync.Done     = $false
+    $logBox.Text   = ""
+    $statusLabel.Text = "Installation en cours..."
+    $timer.Start()
+    [void]$ps.BeginInvoke()
 })
 
 $openButton.Add_Click({
