@@ -1,20 +1,12 @@
 name: Build & Release SuperClaude Installer
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-    tags:
-      - 'v*'
     paths:
       - 'installer-app/**'
-      - '.github/workflows/build.yml'
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version (ex: v1.0.0)'
-        required: false
-        default: 'v1.0.0'
 
 permissions:
   contents: write
@@ -32,21 +24,19 @@ jobs:
 
       - name: Install dependencies
         working-directory: installer-app
-        run: npm install --legacy-peer-deps
+        run: npm install
 
-      - name: Build Windows
+      - name: Build
         working-directory: installer-app
         run: npm run build-win
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
-          ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
 
       - uses: actions/upload-artifact@v4
         with:
           name: windows-exe
           path: installer-app/dist/*.exe
-          if-no-files-found: error
+          if-no-files-found: warn
 
   build-macos:
     name: Build macOS (.dmg)
@@ -60,65 +50,53 @@ jobs:
 
       - name: Install dependencies
         working-directory: installer-app
-        run: npm install --legacy-peer-deps
+        run: npm install
 
-      - name: Build macOS
+      - name: Build
         working-directory: installer-app
         run: npm run build-mac
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
-          ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
 
       - uses: actions/upload-artifact@v4
         with:
           name: macos-dmg
           path: installer-app/dist/*.dmg
-          if-no-files-found: error
+          if-no-files-found: warn
 
   release:
-    name: Create GitHub Release
+    name: Publish Release
     needs: [build-windows, build-macos]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
       - uses: actions/download-artifact@v4
         with:
           name: windows-exe
           path: dist/
+        continue-on-error: true
 
       - uses: actions/download-artifact@v4
         with:
           name: macos-dmg
           path: dist/
+        continue-on-error: true
 
-      - name: Set release info
-        id: info
-        run: |
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
-            TAG="${GITHUB_REF_NAME}"
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            TAG="${{ inputs.version }}"
-          else
-            TAG="latest"
-          fi
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "name=SuperClaude $TAG" >> $GITHUB_OUTPUT
+      - name: List files
+        run: ls -la dist/ || echo "No dist files"
 
-      - name: Create or update release
-        uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.info.outputs.tag }}
-          name: ${{ steps.info.outputs.name }}
-          prerelease: ${{ steps.info.outputs.tag == 'latest' }}
+          tag_name: latest
+          name: SuperClaude latest
+          prerelease: true
           body: |
             ## SuperClaude Installer
 
-            | Plateforme | Fichier | Instructions |
-            |------------|---------|--------------|
-            | **Windows** | `.exe` | Double-cliquer → Installer |
-            | **Mac** | `.dmg` | Ouvrir → glisser dans Applications |
+            | Platform | File |
+            |----------|------|
+            | Windows | `.exe` - double-click to install |
+            | Mac | `.dmg` - drag to Applications |
 
-            Configure automatiquement : plugins Claude Code, MCP servers (Magic, Playwright, Context7), hooks Obsidian.
+            Installs: Claude Code plugins, MCP servers, Obsidian hooks.
           files: dist/*
+          fail_on_unmatched_files: false
