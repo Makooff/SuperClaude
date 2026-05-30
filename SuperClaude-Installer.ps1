@@ -1,5 +1,7 @@
 # SuperClaude Installer — Windows
-# Double-cliquer pour installer (clic droit → Exécuter avec PowerShell)
+# Lancer via Installer.bat (execution policy bypass automatique)
+
+try {
 
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName PresentationCore
@@ -299,3 +301,11 @@ $openButton.Add_Click({
 })
 
 [void]$window.ShowDialog()
+
+} catch {
+    Write-Host "ERREUR: $_" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Assure-toi que Claude Code est installe: https://claude.ai/code"
+    Write-Host "Appuie sur Entree pour fermer..."
+    Read-Host
+}
