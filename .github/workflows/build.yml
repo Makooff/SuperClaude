@@ -14,7 +14,7 @@ permissions:
 jobs:
   build-windows:
     name: Build Windows (.exe)
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -22,14 +22,21 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
+      - name: Install Wine + dependencies
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update -qq
+          sudo apt-get install -y wine wine32 wine64 libwine libwine:i386 fonts-wine
+
+      - name: Install node dependencies
         working-directory: installer-app
         run: npm install
 
-      - name: Build
+      - name: Build Windows installer
         working-directory: installer-app
         run: npm run build-win
         env:
+          WINE: wine
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/upload-artifact@v4
@@ -38,35 +45,9 @@ jobs:
           path: installer-app/dist/*.exe
           if-no-files-found: warn
 
-  build-macos:
-    name: Build macOS (.dmg)
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install dependencies
-        working-directory: installer-app
-        run: npm install
-
-      - name: Build
-        working-directory: installer-app
-        run: npm run build-mac
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: macos-dmg
-          path: installer-app/dist/*.dmg
-          if-no-files-found: warn
-
   release:
     name: Publish Release
-    needs: [build-windows, build-macos]
+    needs: [build-windows]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -75,14 +56,8 @@ jobs:
           path: dist/
         continue-on-error: true
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: macos-dmg
-          path: dist/
-        continue-on-error: true
-
-      - name: List files
-        run: ls -la dist/ || echo "No dist files"
+      - name: List dist
+        run: ls -la dist/ || echo "No files"
 
       - uses: softprops/action-gh-release@v2
         with:
@@ -92,11 +67,11 @@ jobs:
           body: |
             ## SuperClaude Installer
 
-            | Platform | File |
-            |----------|------|
-            | Windows | `.exe` - double-click to install |
-            | Mac | `.dmg` - drag to Applications |
+            | Plateforme | Fichier | Instructions |
+            |------------|---------|--------------|
+            | **Windows** | `.exe` | Double-cliquer pour installer |
+            | **Mac** | `SuperClaude-Installer.command` | `chmod +x` puis double-cliquer |
 
-            Installs: Claude Code plugins, MCP servers, Obsidian hooks.
+            Configure automatiquement : plugins Claude Code, MCP servers, hooks Obsidian.
           files: dist/*
           fail_on_unmatched_files: false
