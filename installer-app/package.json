@@ -18,7 +18,7 @@
     "productName": "SuperClaude Installer",
     "directories": { "output": "dist" },
     "win": {
-      "target": "nsis"
+      "target": "portable"
     },
     "mac": {
       "target": "dmg",
