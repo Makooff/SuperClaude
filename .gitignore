@@ -14,3 +14,7 @@ Thumbs.db
 node_modules/
 .env.local
 MESCLES.md
+
+# Build output
+installer-app/dist/
+dist/
