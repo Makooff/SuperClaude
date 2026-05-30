@@ -228,13 +228,18 @@ $installButton.Add_Click({
 })
 
 $openButton.Add_Click({
-    try { Start-Process "claude" }
-    catch {
-        [System.Windows.MessageBox]::Show(
-            "Tape 'claude' dans un terminal pour demarrer.",
-            "SuperClaude",
-            [System.Windows.MessageBoxButton]::OK
-        )
+    # Try Claude Code desktop app first, then CLI via cmd
+    $claudeExe = @(
+        "$env:LOCALAPPDATA\Programs\claude\Claude.exe",
+        "$env:LOCALAPPDATA\Programs\Claude\Claude.exe",
+        "$env:PROGRAMFILES\Claude\Claude.exe"
+    ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+    if ($claudeExe) {
+        Start-Process $claudeExe
+    } else {
+        # Launch CLI in a new terminal window
+        Start-Process "cmd.exe" -ArgumentList "/k claude"
     }
 })
 
