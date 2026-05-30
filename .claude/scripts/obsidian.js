@@ -124,10 +124,10 @@ async function main() {
       const openTasks = tasks.body
         .split('\n')
         .filter(l => l.includes('- [ ]'))
-        .slice(0, 10)
+        .slice(0, 5)
         .join('\n');
       if (openTasks) {
-        output.push(`[MEMOIRE — Taches ouvertes]\n${openTasks}`);
+        output.push(`[MEM:tasks]\n${openTasks}`);
       }
     }
 
@@ -135,22 +135,22 @@ async function main() {
     const sessionPath = `${project}/Sessions/${today()}.md`;
     const session = await apiRequest('GET', sessionPath);
     if (session.status === 200 && session.body.length > 80) {
-      const preview = session.body.split('\n').slice(0, 25).join('\n');
-      output.push(`[MEMOIRE — Session ${today()}]\n${preview}`);
+      const preview = session.body.split('\n').slice(0, 10).join('\n');
+      output.push(`[MEM:session-${today()}]\n${preview}`);
     }
 
     // 3. Recent decisions
     const decisions = await apiRequest('GET', `${project}/04 - Decisions.md`);
     if (decisions.status === 200) {
-      const preview = decisions.body.split('\n').slice(0, 20).join('\n');
-      output.push(`[MEMOIRE — Decisions recentes]\n${preview}`);
+      const preview = decisions.body.split('\n').slice(0, 8).join('\n');
+      output.push(`[MEM:decisions]\n${preview}`);
     }
 
     // 4. Product context
     const product = await apiRequest('GET', `${project}/PRODUCT.md`);
     if (product.status === 200) {
-      const preview = product.body.split('\n').slice(0, 30).join('\n');
-      output.push(`[MEMOIRE — Contexte produit]\n${preview}`);
+      const preview = product.body.split('\n').slice(0, 12).join('\n');
+      output.push(`[MEM:product]\n${preview}`);
     }
 
     if (output.length) {

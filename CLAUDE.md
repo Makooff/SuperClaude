@@ -1,82 +1,34 @@
-# Claude Code — Config de session
+# SuperClaude
 
-## Skill Routing automatique
+## Skills auto-routing
+| Trigger | Skills |
+|---|---|
+| design/UI/page/composant/layout/animation/hero/card/button/font | `Skill(impeccable)` `Skill(taste-skill)` `Skill(emil-design-eng)` |
+| review/audit | `Skill(code-review)` |
+| test/tdd/coverage | `Skill(tdd-workflow)` |
+| bug/crash/erreur/debug | `Skill(systematic-debugging)` |
+| auth/token/password/API key | `Skill(security)` |
+| plan/feature/architecture | `Skill(writing-plans)` `Skill(executing-plans)` |
+| check/qa/verif/deploy | `Skill(verify)` |
 
-### Design (UI, pages, composants, animations)
-TOUJOURS invoquer ces 3 skills avant tout travail design:
-- `Skill(impeccable)`
-- `Skill(taste-skill)`
-- `Skill(emil-design-eng)`
+## Output
+- Réponses courtes par défaut. Pas de prose inutile.
+- Pas de résumé de ce qui vient d'être fait sauf si demandé.
+- Pas d'explication de code évident.
+- Code: zéro commentaire sauf WHY non-obvious.
 
-Triggers: design, page, composant, component, UI, landing, dashboard, redesign, style, layout, couleur, animation, hero, card, button, font, refaire
+## MCPs
+- `magic` → composants 21st.dev
+- `playwright` → browser/E2E
+- `context7` → docs live (ajouter "use context7")
 
-### Code review
-`Skill(code-review)` — après chaque modification de code, avant chaque commit.
-
-### Tests / TDD
-`Skill(tdd-workflow)` — nouvelle feature, bug fix, "test", "tdd".
-
-### Debugging
-`Skill(systematic-debugging)` — erreur, crash, bug, "debug", "plante".
-
-### Sécurité
-`Skill(security)` — auth, token, password, API key, paiements.
-
-### Planning feature complexe
-`Skill(writing-plans)` → `Skill(executing-plans)` — multi-fichiers, architecture.
-
-### Vérification / QA
-`Skill(verify)` — avant deploy, "check", "qa", "verif".
-
----
+## Design — interdictions
+- Pas de `transition-all` / `background-clip:text` / Inter font / glassmorphism
+- Framer Motion easing: `cubic-bezier(0.16,1,0.3,1)`. Press: `scale(0.97)`.
 
 ## Mémoire Obsidian
-
-Vault: défini par `OBSIDIAN_VAULT` dans `.env.local` (ex: `MonProjet`).
-
-Lire les tâches:
-```bash
-node --no-warnings ".claude/scripts/obsidian.js" read "$OBSIDIAN_VAULT/Taches.md"
-```
-
-Logger une action:
-```bash
-node --no-warnings ".claude/scripts/obsidian.js" append "$OBSIDIAN_VAULT/Sessions/YYYY-MM-DD.md" "## HH:MM — [action]\n[details]"
-```
-
-Le hook `UserPromptSubmit` injecte automatiquement le contexte Obsidian à chaque message.
-
----
-
-## MCP disponibles
-
-- `magic` — `/ui generate [description]` pour composants 21st.dev
-- `playwright` — browser automation, screenshots, E2E
-- `context7` — ajouter `use context7` dans le prompt = docs live
-
----
-
-## Framer Motion
-
-Toujours utiliser context7 pour les APIs à jour.
-Easing par défaut: `cubic-bezier(0.16, 1, 0.3, 1)`.
-Press feedback: `scale(0.97)` on `:active`. Stagger: 30-80ms.
-
----
-
-## Interdictions absolues (design)
-- Pas de gradient text (`background-clip: text`)
-- Pas de `transition-all` (utiliser `transition-colors`, `transition-opacity`)
-- Pas de Inter font (utiliser Outfit ou la font du projet)
-- Pas de glassmorphism par défaut
-- Pas de modal comme première solution
-
----
+`OBSIDIAN_VAULT` dans `.env.local`. Hook inject-context actif.
+Logger: `node .claude/scripts/obsidian.js append "$OBSIDIAN_VAULT/Sessions/YYYY-MM-DD.md" "## HH:MM — [action]"`
 
 ## Commits
-```
-feat: description
-fix: description
-refactor: description
-```
-Pas de Co-Authored-By.
+`feat|fix|refactor: desc` — Pas de Co-Authored-By.
