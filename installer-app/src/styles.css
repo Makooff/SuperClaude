@@ -606,3 +606,22 @@ html, body {
 .check-item {
   animation: fadeSlideIn 0.3s ease both;
 }
+
+/* Screen 5 — project picker */
+.project-path {
+  margin-top: 16px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Menlo', 'Monaco', monospace;
+  font-size: 12px;
+  color: var(--text);
+  word-break: break-all;
+}
+.project-log {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--muted);
+  min-height: 18px;
+}

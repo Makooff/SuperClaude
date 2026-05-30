@@ -206,6 +206,12 @@ function setProgress(percent, label) {
 }
 
 function buildSteps() {
+  const plugins = [
+    'superpowers', 'code-review', 'github', 'vercel', 'supabase',
+    'stripe', 'claude-mem', 'caveman', 'claude-md-management',
+    'context7', 'skill-creator', 'playwright'
+  ]
+
   const steps = [
     {
       label: 'Vérification de l\'environnement',
@@ -213,25 +219,19 @@ function buildSteps() {
       cmd: null
     },
     {
-      label: 'Installation plugin code-review',
-      cmd: 'claude plugin install code-review'
-    },
-    {
-      label: 'Installation plugin superpowers',
-      cmd: 'claude plugin install superpowers'
-    },
-    {
-      label: 'Installation plugin impeccable',
-      cmd: 'claude plugin install impeccable'
-    },
-    {
-      label: 'Installation plugin taste-skill',
-      cmd: 'claude plugin install taste-skill'
-    },
-    {
-      label: 'Installation plugin playwright',
-      cmd: 'claude plugin install playwright'
-    },
+      label: 'Ajout marketplace caveman',
+      cmd: 'claude plugin marketplace add JuliusBrussee/caveman'
+    }
+  ]
+
+  for (const p of plugins) {
+    steps.push({
+      label: `Installation plugin ${p}`,
+      cmd: `claude plugin install ${p}`
+    })
+  }
+
+  steps.push(
     {
       label: 'Configuration MCP context7',
       cmd: 'claude mcp add context7 --scope user -- npx -y @upstash/context7-mcp'
@@ -240,7 +240,7 @@ function buildSteps() {
       label: 'Configuration MCP playwright',
       cmd: 'claude mcp add playwright --scope user -- npx @playwright/mcp@latest'
     }
-  ]
+  )
 
   // MCP magic — only if key provided
   if (magicKey) {
@@ -326,16 +326,41 @@ async function runInstallation() {
 
   await sleep(800)
 
-  // Open Claude if requested
-  if (openAfterInstall) {
-    await api.openClaude()
-    await sleep(300)
-  }
-
+  // Go to project picker
   goTo(5)
-  // Restart checkmark animation by re-appending the SVG strokes
-  triggerCheckmarkAnimation()
 }
+
+// ============================================================
+//  Screen 5 — Choisir le projet
+// ============================================================
+let selectedProject = ''
+
+$('btn-pick-folder').addEventListener('click', async () => {
+  const dir = await api.pickFolder()
+  if (!dir) return
+  selectedProject = dir
+  $('project-path').textContent = dir
+  $('project-path').style.display = 'block'
+  $('btn-setup-project').style.display = 'inline-flex'
+})
+
+$('btn-setup-project').addEventListener('click', async () => {
+  if (!selectedProject) return
+  $('btn-setup-project').disabled = true
+  const projLog = $('project-log')
+  projLog.textContent = 'Copie de la config SuperClaude...'
+  const res = await api.setupProject(selectedProject)
+  if (res.success) {
+    projLog.textContent = '✓ Config copiée — agent ultra (bypassPermissions) activé. Ouverture de Claude Code...'
+    await api.openClaude(selectedProject)
+    await sleep(600)
+    goTo(6)
+    triggerCheckmarkAnimation()
+  } else {
+    projLog.textContent = '✗ Erreur: ' + (res.error || 'copie échouée')
+    $('btn-setup-project').disabled = false
+  }
+})
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
