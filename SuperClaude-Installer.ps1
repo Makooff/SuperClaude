@@ -174,18 +174,24 @@ $worker.WorkerReportsProgress = $true
 
 $worker.add_DoWork({
     param($sender, $e)
+    # Attach a runspace so ScriptBlocks can execute on this thread
+    $rs = [System.Management.Automation.Runspaces.RunspaceFactory]::CreateRunspace()
+    $rs.Open()
+    [System.Management.Automation.Runspaces.Runspace]::DefaultRunspace = $rs
+
     $allSteps = $e.Argument
     for ($i = 0; $i -lt $allSteps.Count; $i++) {
         $step = $allSteps[$i]
         $sender.ReportProgress($i, $step.Label)
         try {
-            $out = & $step.Cmd
-            $sender.ReportProgress($i, "[OK] $($step.Label) -- $out")
+            $out = (& $step.Cmd) -join " "
+            $sender.ReportProgress($i, "[OK] $($step.Label)")
         } catch {
             $sender.ReportProgress($i, "[WARN] $($step.Label): $_")
         }
         Start-Sleep -Milliseconds 400
     }
+    $rs.Close()
 })
 
 $worker.add_ProgressChanged({
