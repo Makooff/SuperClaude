@@ -18,17 +18,19 @@
     "productName": "SuperClaude Installer",
     "directories": { "output": "dist" },
     "win": {
-      "target": "nsis",
-      "icon": "assets/icon.ico"
+      "target": "nsis"
     },
     "mac": {
       "target": "dmg",
-      "icon": "assets/icon.icns",
       "category": "public.app-category.developer-tools"
     },
     "nsis": {
       "oneClick": true,
-      "perMachine": false
+      "perMachine": false,
+      "installerLanguages": ["fr_FR", "en_US"]
+    },
+    "linux": {
+      "target": "AppImage"
     }
   }
 }
