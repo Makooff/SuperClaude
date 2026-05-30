@@ -1,12 +1,12 @@
 # SuperClaude Installer - Windows
-# Lancer via Installer.bat
+# Lancer via Lancer.vbs (sans terminal visible)
 
 try {
 
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName PresentationCore
 Add-Type -AssemblyName WindowsBase
-Add-Type -AssemblyName System.ComponentModel
+Add-Type -AssemblyName System.Windows.Forms
 
 $xaml = @"
 <Window
@@ -113,7 +113,7 @@ $xaml = @"
             </Button>
 
             <Button Name="OpenClaudeButton"
-                Content="  Ouvrir Claude Code  "
+                Content="  Choisir dossier projet ->  "
                 FontSize="14"
                 FontFamily="Segoe UI"
                 Foreground="White"
@@ -228,7 +228,49 @@ $installButton.Add_Click({
 })
 
 $openButton.Add_Click({
-    # Try Claude Code desktop app first, then CLI via cmd
+    # 1. Pick project folder
+    $picker = [System.Windows.Forms.FolderBrowserDialog]::new()
+    $picker.Description = "Choisir le dossier de ton projet Claude Code"
+    $picker.ShowNewFolderButton = $true
+    $picker.RootFolder = [System.Environment+SpecialFolder]::Desktop
+
+    if ($picker.ShowDialog() -ne [System.Windows.Forms.DialogResult]::OK) { return }
+    $projectDir = $picker.SelectedPath
+
+    # 2. Copy SuperClaude config into project folder
+    $src = Split-Path -Parent $MyInvocation.ScriptName
+    $statusLabel.Text = "Copie de la config dans $projectDir..."
+
+    $toCopy = @(".claude", "CLAUDE.md", ".mcp.json")
+    foreach ($item in $toCopy) {
+        $srcPath = Join-Path $src $item
+        $dstPath = Join-Path $projectDir $item
+        if (Test-Path $srcPath) {
+            if ((Get-Item $srcPath).PSIsContainer) {
+                Copy-Item $srcPath $dstPath -Recurse -Force
+            } else {
+                Copy-Item $srcPath $dstPath -Force
+            }
+        }
+    }
+
+    # Copy .env.example -> .env.local if not already present
+    $envSrc = Join-Path $src ".env.example"
+    $envDst = Join-Path $projectDir ".env.local"
+    if ((Test-Path $envSrc) -and -not (Test-Path $envDst)) {
+        Copy-Item $envSrc $envDst -Force
+    }
+
+    # Add .env.local to .gitignore
+    $gitignore = Join-Path $projectDir ".gitignore"
+    if (-not (Test-Path $gitignore) -or -not (Get-Content $gitignore -ErrorAction SilentlyContinue | Select-String "\.env\.local")) {
+        Add-Content $gitignore "`n.env.local"
+    }
+
+    $logBox.Text += "`n[OK] Config copiee dans $projectDir`n"
+    $statusLabel.Text = "Pret ! Ouverture de Claude Code..."
+
+    # 3. Open Claude Code in the project folder
     $claudeExe = @(
         "$env:LOCALAPPDATA\Programs\claude\Claude.exe",
         "$env:LOCALAPPDATA\Programs\Claude\Claude.exe",
@@ -236,10 +278,9 @@ $openButton.Add_Click({
     ) | Where-Object { Test-Path $_ } | Select-Object -First 1
 
     if ($claudeExe) {
-        Start-Process $claudeExe
+        Start-Process $claudeExe -WorkingDirectory $projectDir
     } else {
-        # Launch CLI in a new terminal window
-        Start-Process "cmd.exe" -ArgumentList "/k claude"
+        Start-Process "cmd.exe" -ArgumentList "/k cd /d `"$projectDir`" && claude"
     }
 })
 
