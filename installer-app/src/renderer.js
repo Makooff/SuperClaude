@@ -206,10 +206,18 @@ function setProgress(percent, label) {
 }
 
 function buildSteps() {
-  const plugins = [
+  // Official marketplace plugins
+  const officialPlugins = [
     'superpowers', 'code-review', 'github', 'vercel', 'supabase',
     'stripe', 'claude-mem', 'caveman', 'claude-md-management',
     'context7', 'skill-creator', 'playwright'
+  ]
+
+  // wshobson/agents marketplace — 191 agents, 155 skills (best-in-class)
+  const wshobsonPlugins = [
+    'comprehensive-review', 'debugging-toolkit', 'unit-testing',
+    'security-scanning', 'full-stack-orchestration', 'frontend-mobile-development',
+    'ui-design', 'cicd-automation', 'agent-orchestration', 'application-performance'
   ]
 
   const steps = [
@@ -221,13 +229,24 @@ function buildSteps() {
     {
       label: 'Ajout marketplace caveman',
       cmd: 'claude plugin marketplace add JuliusBrussee/caveman'
+    },
+    {
+      label: 'Ajout marketplace wshobson/agents (191 agents, 155 skills)',
+      cmd: 'claude plugin marketplace add wshobson/agents'
     }
   ]
 
-  for (const p of plugins) {
+  for (const p of officialPlugins) {
     steps.push({
       label: `Installation plugin ${p}`,
       cmd: `claude plugin install ${p}`
+    })
+  }
+
+  for (const p of wshobsonPlugins) {
+    steps.push({
+      label: `Installation agent-pack ${p}`,
+      cmd: `claude plugin install ${p}@agents`
     })
   }
 
