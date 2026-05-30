@@ -1,4 +1,8 @@
-# SuperClaude
+<img src="assets/banner.svg" alt="SuperClaude" width="100%"/>
+
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Mac-7c3aed?style=flat-square&logo=windowsterminal&logoColor=white)
+![Claude Code](https://img.shields.io/badge/Claude%20Code-required-09090b?style=flat-square)
+![License](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)
 
 Config Claude Code complète — skills auto-routés, MCPs actifs, mémoire Obsidian cross-session.
 Un script, un projet bootstrappé, premier message opérationnel.
@@ -7,13 +11,13 @@ Un script, un projet bootstrappé, premier message opérationnel.
 
 ## Install — une fois par machine
 
-### Windows
+### 🪟 Windows
 1. [Télécharger SuperClaude.zip](https://github.com/Makooff/SuperClaude/archive/refs/heads/main.zip)
 2. Extraire le ZIP
 3. Double-cliquer sur `SuperClaude-Installer.ps1` → **Exécuter avec PowerShell**
 4. Cliquer sur **Installer** — Claude Code s'ouvre automatiquement
 
-### Mac / Linux
+### 🍎 Mac / Linux
 1. [Télécharger SuperClaude.zip](https://github.com/Makooff/SuperClaude/archive/refs/heads/main.zip)
 2. Extraire le ZIP
 3. Dans Terminal :
@@ -34,13 +38,13 @@ Un script, un projet bootstrappé, premier message opérationnel.
 
 ## Nouveau projet
 
-### Windows
+### 🪟 Windows
 ```powershell
 cd C:/SuperClaude
 .\new-project.ps1 -Name MonProjet -Path C:\Projets\MonProjet
 ```
 
-### Mac / Linux
+### 🍎 Mac / Linux
 ```bash
 ~/SuperClaude/new-project.sh MonProjet ~/Projets/MonProjet
 ```
@@ -53,12 +57,12 @@ Le script copie la config, remplit `.env.local` interactivement et configure `.g
 
 | Ce qui se passe | Comment |
 |-----------------|---------|
-| Claude connaît tes tâches en cours | Obsidian injecte `Taches.md` à chaque message |
-| Claude sait les décisions passées | Obsidian injecte `Decisions.md` automatiquement |
-| Skills s'activent seuls | Tu écris "design" → impeccable+taste-skill s'invoquent |
-| Composants UI générés | MCP Magic → `/ui generate [description]` |
-| Docs live | MCP Context7 → ajouter `use context7` dans le prompt |
-| Tests E2E + screenshots | MCP Playwright → automatique |
+| 🧠 Claude connaît tes tâches en cours | Obsidian injecte `Taches.md` à chaque message |
+| 📋 Claude sait les décisions passées | Obsidian injecte `Decisions.md` automatiquement |
+| ⚡ Skills s'activent seuls | Tu écris "design" → impeccable+taste-skill s'invoquent |
+| 🎨 Composants UI générés | MCP Magic → `/ui generate [description]` |
+| 📚 Docs live | MCP Context7 → ajouter `use context7` dans le prompt |
+| 🧪 Tests E2E + screenshots | MCP Playwright → automatique |
 
 ---
 
@@ -79,18 +83,18 @@ Rien à faire — les skills s'invoquent selon les mots détectés dans le promp
 
 ## MCP servers
 
-### Magic — générer un composant UI
+### ⚡ Magic — générer un composant UI
 ```
 /ui generate une card produit avec image, titre, prix et bouton ajouter au panier
 ```
 
-### Context7 — docs live
+### 📚 Context7 — docs live
 Ajouter `use context7` dans n'importe quel prompt :
 ```
 Anime cette card avec Framer Motion. use context7 pour les APIs à jour.
 ```
 
-### Playwright — browser automation
+### 🧪 Playwright — browser automation
 Automatique pour les tests E2E. Exemple de prompt :
 ```
 Vérifie que le formulaire de login fonctionne avec Playwright.
@@ -111,6 +115,8 @@ SuperClaude/
 ├── setup.sh                        ← install machine Mac/Linux (CLI)
 ├── new-project.ps1                 ← bootstrap projet Windows
 ├── new-project.sh                  ← bootstrap projet Mac/Linux
+├── assets/
+│   └── banner.svg                 ← bannière README
 ├── .claude/
 │   ├── settings.json          ← hooks auto-skill + plugins activés
 │   └── scripts/
