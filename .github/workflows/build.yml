@@ -1,0 +1,66 @@
+name: Build SuperClaude Installer
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'installer-app/**'
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    name: Build Windows (.exe)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: installer-app/package.json
+
+      - name: Install dependencies
+        working-directory: installer-app
+        run: npm install
+
+      - name: Build Windows installer
+        working-directory: installer-app
+        run: npm run build-win
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SuperClaude-Installer-Windows
+          path: installer-app/dist/*.exe
+          retention-days: 30
+
+  build-macos:
+    name: Build macOS (.dmg)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: installer-app/package.json
+
+      - name: Install dependencies
+        working-directory: installer-app
+        run: npm install
+
+      - name: Build macOS installer
+        working-directory: installer-app
+        run: npm run build-mac
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SuperClaude-Installer-macOS
+          path: installer-app/dist/*.dmg
+          retention-days: 30
