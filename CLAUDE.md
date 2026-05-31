@@ -13,6 +13,7 @@
 | Sécurité | `Skill(security)` | auth, tokens, clés, permissions, vulnérabilités |
 | Plan / architecture | `Skill(writing-plans)` `Skill(executing-plans)` | nouvelle feature, conception, comment implémenter |
 | Vérification | `Skill(verify)` | vérifier avant push, QA, CI, deploy |
+| Vidéo / ads / motion | `Skill(video-generation)` | pub, ad, teaser, motion design, animation vidéo, Pika, Hyperframes |
 
 Si le hook `[AUTO-SKILL]` ou `⚡ SKILLS REQUIS` précise des skills : invoquer IMMÉDIATEMENT.
 
@@ -27,6 +28,11 @@ Les learnings accumulés sont injectés automatiquement. Les appliquer sans ques
 - `magic` → composants 21st.dev
 - `playwright` → browser/E2E
 - `context7` → docs live
+
+## Vidéo / Ads
+- `Pika` → ads IA, teaser, vidéo depuis prompt. API key: `$PIKA_API_KEY`
+- `Hyperframes` → motion design HTML→vidéo. CLI: `npx hyperframes render`
+- Voir `Skill(video-generation)` pour workflow complet
 
 ## Design — interdictions absolues
 - NO `transition-all` / `background-clip:text` / Inter font / glassmorphism

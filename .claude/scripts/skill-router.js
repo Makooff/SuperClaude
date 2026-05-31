@@ -82,6 +82,11 @@ function classify(msg) {
     tasks.push({ skill: 'Skill(verify)', reason: 'vérification/déploiement' })
   }
 
+  // Video / ads / motion design
+  if (/vid[eé]o|motion.?design|motion|animation.?vid|ads?|pub |teaser|trailer|spot|pika|hyperframes|render|composition/.test(msg)) {
+    tasks.push({ skill: 'Skill(video-generation)', reason: 'vidéo/ads/motion détecté' })
+  }
+
   // New feature (no other category matched)
   if (tasks.length === 0 && /cr[eé]e|ajoute|impl[eé]mente|construit|fais|génère|nouveau|nouvelle|build|make|add/.test(msg)) {
     tasks.push({ skill: 'Skill(writing-plans)', reason: 'nouvelle fonctionnalité — plan requis' })

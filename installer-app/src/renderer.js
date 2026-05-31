@@ -8,6 +8,7 @@ const api = window.api
 let currentScreen = 1
 let magicKey = ''
 let obsidianKey = ''
+let pikaKey = ''
 let openAfterInstall = true
 let checksOk = false
 
@@ -164,6 +165,7 @@ $('btn-skip-prereq').addEventListener('click', () => goTo(3))
 $('btn-install').addEventListener('click', () => {
   magicKey = $('input-magic-key').value.trim()
   obsidianKey = $('input-obsidian-key').value.trim()
+  pikaKey = $('input-pika-key').value.trim()
   openAfterInstall = $('check-open-claude').checked
   goTo(4)
   runInstallation()
@@ -258,6 +260,10 @@ function buildSteps() {
     {
       label: 'Configuration MCP playwright',
       cmd: 'claude mcp add playwright --scope user -- npx @playwright/mcp@latest'
+    },
+    {
+      label: 'Installation Hyperframes (motion design)',
+      cmd: 'npm install -g hyperframes'
     }
   )
 
@@ -266,6 +272,16 @@ function buildSteps() {
     steps.push({
       label: 'Configuration MCP magic',
       cmd: `claude mcp add magic --scope user --env API_KEY="${magicKey}" -- npx -y @21st-dev/magic@latest`
+    })
+  }
+
+  // Pika key — write to .env.local via env var (handled in setup-project)
+  if (pikaKey) {
+    steps.push({
+      label: 'Configuration Pika API key',
+      fake: 400,
+      cmd: null,
+      pikaKey
     })
   }
 
