@@ -1,11 +1,6 @@
 name: Build SuperClaude Installer
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'installer-app/**'
   workflow_dispatch:
 
 jobs:

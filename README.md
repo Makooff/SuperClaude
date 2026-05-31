@@ -1,263 +1,314 @@
 <div align="center">
 
-# ⚡ SuperClaude
+<img src="assets/banner.svg" alt="SuperClaude" width="100%" />
 
-**Setup Claude Code ultra-poussé — en 1 clic.**
+<br/>
 
-22 plugins · 191 agents · 155 skills · mémoire cross-session · agent ultra · MCPs préconfigurés
+[![Platform](https://img.shields.io/badge/macOS%20%2B%20Windows-7c3aed?style=flat-square&logo=electron&logoColor=white&label=app)](https://github.com/Makooff/SuperClaude)
+[![Plugins](https://img.shields.io/badge/22%20plugins-10b981?style=flat-square&label=installed)](https://github.com/Makooff/SuperClaude)
+[![Agents](https://img.shields.io/badge/191%20agents%20%C2%B7%20155%20skills-7c3aed?style=flat-square&label=wshobson)](https://github.com/wshobson/agents)
+[![License](https://img.shields.io/badge/MIT-71717a?style=flat-square&label=license)](LICENSE)
 
-![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-7c3aed)
-![Electron](https://img.shields.io/badge/app-Electron-09090b)
-![License](https://img.shields.io/badge/license-MIT-10b981)
+**App desktop qui transforme Claude Code en agent ultra-puissant — 1 clic, 60 secondes.**
+
+[Quickstart](#quickstart) · [Tutoriel](#tutoriel) · [Ce qui est installé](#ce-qui-est-installé) · [FAQ](#dépannage)
 
 </div>
 
 ---
 
-## C'est quoi ?
+## Pourquoi SuperClaude ?
 
-Une **app desktop** (Mac + PC) qui transforme Claude Code en agent ultra-puissant en quelques clics :
+Claude Code natif = puissant mais vierge. Tu dois setup plugins, MCPs, skills, mémoire, permissions manuellement. SuperClaude automatise tout ça en 1 clic via une app desktop.
 
-- Installe les **meilleurs plugins** de l'écosystème (officiels + `wshobson/agents`)
-- Active **191 agents** et **155 skills** spécialisés (review, debug, test, sécurité, fullstack, perf, orchestration…)
-- Configure les **MCPs** : génération de composants UI, docs live, automation browser
-- Rend Claude **conscient** avec mémoire cross-session (`claude-mem` + Obsidian)
-- Active un **agent ultra** (`bypassPermissions`) — Claude agit sans demander
-- Tu **choisis ton dossier projet** dans l'UI → Claude s'ouvre dedans, prêt
+| Sans SuperClaude | Avec SuperClaude |
+|---|---|
+| 0 plugin installé | 22 plugins + 10 packs agents |
+| Claude demande confirmation à chaque action | Agent ultra — agit sans interrompre |
+| Pas de mémoire entre sessions | `claude-mem` + Obsidian cross-session |
+| Pas de skill routing | Mots-clés → skills auto-invoqués |
+| MCPs à configurer manuellement | magic, context7, playwright préconfigurés |
 
 ---
 
-## ⚡ Quickstart
+## Quickstart
 
 ```bash
 git clone https://github.com/Makooff/SuperClaude.git
-cd SuperClaude
-./build.sh          # Mac/Linux  ·  Windows : .\build.ps1
+cd SuperClaude/installer-app && npm install && npm start
 ```
 
-L'app se construit dans `installer-app/dist/`. Lance-la, clique **Installer**, choisis ton dossier projet. Fini.
-
-> Pas envie de builder ? Mode dev direct : `cd installer-app && npm install && npm start`
+> Builder en .exe/.dmg : `./build.sh` (Mac) ou `.\build.ps1` (Windows) — voir [BUILD.md](BUILD.md)
 
 ---
 
-## 📖 Tutoriel complet
+## Tutoriel
 
 ### Étape 0 — Prérequis
 
-| Outil | Version | Lien |
+| Outil | Version min | Lien |
 |---|---|---|
-| Node.js | 18+ | [nodejs.org](https://nodejs.org) |
-| Claude Code | dernière | [claude.ai/code](https://claude.ai/code) |
+| Node.js | 18+ | [nodejs.org/en/download](https://nodejs.org/en/download) |
+| Claude Code CLI | dernière | [claude.ai/code](https://claude.ai/code) |
 
-> L'app vérifie ces deux outils à l'écran 2 et te donne les liens si l'un manque.
+Vérifie :
+```bash
+node --version   # v18+
+claude --version
+```
+
+> L'app vérifie ces deux automatiquement à l'écran 2 et donne les liens d'install si manquants.
+
+---
 
 ### Étape 1 — Récupérer SuperClaude
 
-**Option A — git (recommandé)**
+**Option A — git**
 ```bash
 git clone https://github.com/Makooff/SuperClaude.git
 cd SuperClaude
 ```
 
 **Option B — ZIP**
-[Télécharger le ZIP](https://github.com/Makooff/SuperClaude/archive/refs/heads/main.zip) → extraire → ouvrir le dossier dans un terminal.
+[Télécharger le ZIP](https://github.com/Makooff/SuperClaude/archive/refs/heads/main.zip) → extraire → ouvrir un terminal dans le dossier.
 
-### Étape 2 — Construire l'app
+---
 
-**Mac / Linux**
+### Étape 2 — Lancer l'app
+
+**Mode dev (direct, aucun build)**
 ```bash
-./build.sh
+cd installer-app
+npm install
+npm start
 ```
 
-**Windows**
-```powershell
+**Mode production (génère .dmg / .exe)**
+```bash
+# Mac / Linux
+./build.sh
+
+# Windows
 .\build.ps1
 ```
+Artefact dans `installer-app/dist/`. Voir [BUILD.md](BUILD.md) pour détails.
 
-Artefact généré dans `installer-app/dist/` :
-- Windows → `.exe` (NSIS)
-- macOS → `.dmg`
+---
 
-> Détails build : voir [`BUILD.md`](BUILD.md).
+### Étape 3 — L'app — 6 écrans
 
-### Étape 3 — Lancer & installer
+```
+┌─────────────────────────────────────────────────┐
+│  1. Welcome     → aperçu des features           │
+│  2. Prérequis   → vérif Node.js + Claude Code   │
+│  3. Config      → clés API optionnelles          │
+│  4. Installation→ 25 commandes, logs live        │
+│  5. Projet      → choix dossier + copie config   │
+│  6. Fini        → Claude Code s'ouvre            │
+└─────────────────────────────────────────────────┘
+```
 
-Ouvre l'app. Elle te guide en 6 écrans :
+**Écran 3 — Config (tout optionnel)**
 
-1. **Bienvenue** — aperçu de ce qui sera installé
-2. **Prérequis** — vérifie Node.js + Claude Code
-3. **Config** — clés API optionnelles (Magic 21st.dev, Obsidian) + options
-4. **Installation** — installe plugins + MCPs en live (logs visibles)
-5. **Choisir le projet** — bouton → tu sélectionnes ton dossier → copie config + active l'agent ultra
-6. **Fini** — Claude Code s'ouvre dans ton dossier
+| Champ | Usage |
+|---|---|
+| Magic API Key | Génération de composants UI via 21st.dev |
+| Obsidian API Key | Mémoire cross-session via vault Obsidian |
+| Ouvrir Claude après install | Ouvre Claude Code automatiquement |
+
+**Écran 5 — Choisir le projet**
+
+1. Clic "Choisir le dossier projet" → dialog natif OS
+2. Sélectionne (ou crée) ton dossier projet
+3. Clic "Installer dans ce projet" → copie `.claude/`, `CLAUDE.md`, `.mcp.json`
+4. Active agent ultra dans `.claude/settings.json`
+5. Ouvre Claude Code dans ce dossier
+
+---
 
 ### Étape 4 — Premier message
 
-Dans Claude Code, écris simplement :
+Dans Claude Code :
 ```
-Crée une landing page pour une app de todo, design moderne dark.
+Crée une landing page dark pour une app de todo, avec hero animé et card features.
 ```
-Le mot « design » déclenche auto `impeccable` + `taste-skill` + `emil-design-eng`. Aucun setup manuel.
+
+Le mot `design` détecte automatiquement → invoque `impeccable` + `taste-skill` + `emil-design-eng`. Zéro setup manuel.
 
 ---
 
-## 📦 Ce qui est installé
+## Ce qui est installé
 
 ### Plugins officiels (12)
+
 | Plugin | Rôle |
 |---|---|
-| `superpowers` | Skills méta (brainstorming, plans, TDD, debug) |
-| `code-review` | Review de PR/diff |
-| `github` | Opérations GitHub |
-| `vercel` / `supabase` / `stripe` | Intégrations services |
-| `claude-mem` | Mémoire auto cross-session |
-| `caveman` | Mode réponse compact (économie tokens) |
-| `claude-md-management` | Maintenance CLAUDE.md |
-| `context7` | Docs live |
-| `skill-creator` | Création de skills |
-| `playwright` | Automation browser |
+| `superpowers` | Skills méta : brainstorming, plans, TDD, debug, git |
+| `code-review` | Review PR/diff avec findings sévérisés |
+| `github` | Issues, PRs, CI via MCP GitHub |
+| `vercel` | Deploy, env vars, AI SDK, middleware |
+| `supabase` | DB, auth, edge functions |
+| `stripe` | Paiements, webhooks, test cards |
+| `claude-mem` | Mémoire auto cross-session, zéro config |
+| `caveman` | Mode réponse compact — économie tokens |
+| `claude-md-management` | Mise à jour CLAUDE.md depuis la session |
+| `context7` | Docs live (React, Next.js, Prisma…) |
+| `skill-creator` | Création de skills custom |
+| `playwright` | Automation browser, E2E, screenshots |
 
-### Packs `wshobson/agents` — 191 agents, 155 skills (10)
+### Packs `wshobson/agents` — 191 agents, 155 skills
+
 | Pack | Contenu |
 |---|---|
-| `comprehensive-review` | Review multi-angle |
-| `debugging-toolkit` | Debug + optimisation DX |
-| `unit-testing` | Tests auto Python/JS |
-| `security-scanning` | SAST + sécurité API |
-| `full-stack-orchestration` | Feature end-to-end |
-| `frontend-mobile-development` | React / React Native |
-| `ui-design` | Agents UI/UX |
-| `cicd-automation` | Pipelines CI/CD |
+| `comprehensive-review` | Review multi-angle : perf, sécu, maintenabilité |
+| `debugging-toolkit` | Debug systématique + optimisation DX |
+| `unit-testing` | Tests auto Python/JS/TS |
+| `security-scanning` | SAST, secrets, sécurité API |
+| `full-stack-orchestration` | Feature complète end-to-end |
+| `frontend-mobile-development` | React, React Native, mobile |
+| `ui-design` | Agents UI/UX + accessibilité |
+| `cicd-automation` | Pipelines CI/CD, GitHub Actions |
 | `agent-orchestration` | Systèmes multi-agents |
-| `application-performance` | Profiling + optimisation |
+| `application-performance` | Profiling, Core Web Vitals |
 
 ### MCP servers (3)
-| MCP | Usage |
+
+| MCP | Invocation |
 |---|---|
-| `magic` | `/ui generate [description]` → composants 21st.dev |
+| `magic` | Composants UI via 21st.dev |
 | `context7` | `use context7` dans le prompt → docs à jour |
-| `playwright` | Tests E2E + screenshots |
+| `playwright` | Tests E2E, capture d'écran, automation |
 
 ---
 
-## 🤖 Agent ultra
+## Agent ultra
 
-L'installeur écrit dans le `.claude/settings.json` du projet :
+L'app écrit dans `.claude/settings.json` du projet :
 ```json
-{ "permissions": { "defaultMode": "bypassPermissions" } }
+{
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  }
+}
 ```
-Claude exécute tout (commandes, éditions) **sans demander confirmation**. Puissance max.
 
-> ⚠️ **Sécurité** : `bypassPermissions` donne à l'agent un contrôle total sur le dossier projet. À n'utiliser que sur des projets de confiance, sur ta machine. Pour revenir à un mode prudent, change `defaultMode` en `acceptEdits` ou supprime la clé.
+Claude exécute commandes et éditions **sans demander confirmation**. Idéal pour builder vite.
+
+> **Sécurité** : `bypassPermissions` = contrôle total sur le dossier. Utiliser sur projets de confiance uniquement. Pour revenir à un mode prudent : changer `defaultMode` en `acceptEdits`.
 
 ---
 
-## 🧠 Mémoire — Claude conscient
+## Mémoire cross-session
 
 Deux couches :
 
-1. **`claude-mem`** — mémoire auto cross-session, zéro config. Installée par défaut.
-2. **Obsidian** (optionnel) — injecte tâches / décisions / contexte produit à chaque message via un hook `UserPromptSubmit`.
+**1. `claude-mem`** — installé par défaut, zéro config. Mémorise automatiquement faits importants entre sessions.
 
-Setup Obsidian détaillé : [`docs/obsidian-setup.md`](docs/obsidian-setup.md).
-Renseigne `OBSIDIAN_VAULT` et `OBSIDIAN_API_KEY` dans `.env.local`.
+**2. Obsidian** (optionnel) — injecte tâches ouvertes, décisions, contexte produit à chaque prompt via hook `UserPromptSubmit`.
+
+Setup : [`docs/obsidian-setup.md`](docs/obsidian-setup.md)
+Variables dans `.env.local` :
+```bash
+OBSIDIAN_VAULT=/chemin/vers/vault
+OBSIDIAN_API_KEY=ta_cle
+```
 
 ---
 
-## 🎯 Skill routing automatique
+## Skill routing automatique
 
-Aucune commande à taper — les skills s'invoquent selon les mots du prompt :
+CLAUDE.md détecte les mots-clés et invoque les skills sans commande :
 
 | Mot dans le prompt | Skills invoqués |
 |---|---|
-| design, UI, composant, animation, page, layout, hero, card, button, font | `impeccable` + `taste-skill` + `emil-design-eng` |
-| review, audit | `code-review` |
-| test, tdd, coverage | `tdd-workflow` |
-| bug, crash, erreur, debug | `systematic-debugging` |
-| auth, token, password, API key | `security` |
-| plan, feature, architecture | `writing-plans` + `executing-plans` |
-| check, qa, verif, deploy | `verify` |
+| `design` `UI` `composant` `animation` `page` `layout` `hero` `card` `button` `font` | `impeccable` + `taste-skill` + `emil-design-eng` |
+| `review` `audit` | `code-review` |
+| `test` `tdd` `coverage` | `tdd-workflow` |
+| `bug` `crash` `erreur` `debug` | `systematic-debugging` |
+| `auth` `token` `password` `API key` | `security` |
+| `plan` `feature` `architecture` | `writing-plans` + `executing-plans` |
+| `check` `qa` `verif` `deploy` | `verify` |
 
 ---
 
-## 🔌 Exemples MCP
+## Exemples MCP
 
-**Magic — générer un composant**
+**Générer un composant UI (magic)**
 ```
-/ui generate une card produit avec image, titre, prix, bouton panier
-```
-
-**Context7 — docs live**
-```
-Anime cette card avec Framer Motion. use context7 pour les APIs à jour.
+Crée une card pricing avec 3 tiers, toggle mensuel/annuel, highlight tier Pro.
 ```
 
-**Playwright — E2E**
+**Docs live (context7)**
 ```
-Vérifie que le formulaire de login fonctionne avec Playwright.
+Anime cette liste avec Framer Motion. use context7 pour les APIs à jour.
+```
+
+**Automation browser (playwright)**
+```
+Vérifie que le form de login accepte les credentials valides et rejette les invalides.
 ```
 
 ---
 
-## 🆕 Nouveau projet (sans l'app)
+## Nouveau projet (sans relancer l'app)
 
-Fallback CLI si tu ne veux pas relancer l'app :
+Fallback CLI :
 
-**Windows**
-```powershell
+```bash
+# Mac / Linux
+./new-project.sh MonProjet ~/Projets/MonProjet
+
+# Windows
 .\new-project.ps1 -Name MonProjet -Path C:\Projets\MonProjet
 ```
 
-**Mac / Linux**
-```bash
-./new-project.sh MonProjet ~/Projets/MonProjet
-```
-
-Copie la config, remplit `.env.local` interactivement, met à jour `.gitignore`.
+Copie config, remplit `.env.local` interactivement, met à jour `.gitignore`.
 
 ---
 
-## 📁 Structure
+## Structure du repo
 
 ```
 SuperClaude/
-├── installer-app/            ← app Electron (Mac + PC)
-│   ├── main.js               ← process principal + IPC (copie config, picker)
-│   ├── preload.js
-│   └── src/                  ← UI (index.html, renderer.js, styles.css)
-├── build.sh / build.ps1      ← build l'app en .dmg / .exe
-├── BUILD.md                  ← guide de build
-├── CLAUDE.md                 ← instructions + skill routing (injecté chaque session)
-├── .mcp.json                 ← MCP servers (magic, playwright, context7)
-├── .env.example              ← template secrets → .env.local
-├── setup.ps1 / setup.sh      ← install machine CLI (alternatif)
-├── new-project.ps1 / .sh     ← bootstrap projet (fallback)
+├── installer-app/          ← app Electron (Mac + PC)
+│   ├── main.js             ← IPC : pick-folder, setup-project, open-claude
+│   ├── preload.js          ← bridge contextBridge → renderer
+│   └── src/                ← UI (index.html, renderer.js, styles.css)
+├── assets/
+│   └── banner.svg          ← bannière GitHub
+├── build.sh / build.ps1    ← build .dmg / .exe
+├── BUILD.md                ← guide de build complet
+├── CLAUDE.md               ← skill routing + instructions session
+├── .mcp.json               ← MCPs : magic, playwright, context7
+├── .env.example            ← template → .env.local
+├── setup.ps1 / setup.sh    ← install CLI (alternatif app)
+├── new-project.ps1 / .sh   ← bootstrap projet sans app
 ├── .claude/
-│   ├── settings.json         ← hooks auto-skill + plugins + marketplaces
-│   ├── skills/               ← 5 skills custom (impeccable, taste-skill, emil-design-eng, tdd-workflow, security)
-│   └── scripts/obsidian.js   ← bridge Obsidian REST API
+│   ├── settings.json       ← plugins, marketplaces, hooks
+│   ├── skills/             ← impeccable, taste-skill, emil-design-eng, tdd-workflow, security
+│   └── scripts/obsidian.js ← bridge Obsidian REST API
 └── docs/
-    ├── prompts.md            ← prompts prêts par type de tâche
-    └── obsidian-setup.md     ← guide Obsidian
+    ├── prompts.md          ← prompts prêts par tâche
+    └── obsidian-setup.md   ← guide Obsidian
 ```
 
 ---
 
-## ❓ Dépannage
+## Dépannage
 
 | Problème | Solution |
 |---|---|
-| « Node.js non trouvé » | Installer Node 18+ depuis [nodejs.org](https://nodejs.org), relancer l'app |
-| « Claude Code non trouvé » | Installer depuis [claude.ai/code](https://claude.ai/code), vérifier `claude --version` |
-| Un plugin échoue à l'install | Non-bloquant — l'installeur continue. Réinstaller plus tard : `claude plugin install <nom>` |
-| Claude demande encore confirmation | Vérifier `defaultMode: bypassPermissions` dans `.claude/settings.json` du projet |
-| `./build.sh: permission denied` | `chmod +x build.sh` puis relancer |
+| « Node.js non trouvé » | Installer Node 18+ → [nodejs.org](https://nodejs.org), relancer l'app |
+| « Claude Code non trouvé » | Installer CLI → [claude.ai/code](https://claude.ai/code), vérifier `claude --version` |
+| Plugin échoue à l'install | Non-bloquant. Réinstaller : `claude plugin install <nom>` |
+| Claude demande encore confirmation | Vérifier `"defaultMode": "bypassPermissions"` dans `.claude/settings.json` du projet |
+| `./build.sh: permission denied` | `chmod +x build.sh && ./build.sh` |
+| App ne se lance pas (Windows) | Installer [Visual C++ Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe) |
 
 ---
 
 <div align="center">
 
-MIT · fait avec ⚡ pour Claude Code
+MIT · [Makooff](https://github.com/Makooff) · fait avec ⚡ pour Claude Code
 
 </div>
