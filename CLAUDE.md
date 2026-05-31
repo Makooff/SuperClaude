@@ -1,34 +1,42 @@
 # SuperClaude
 
-## Skills auto-routing
-| Trigger | Skills |
-|---|---|
-| design/UI/page/composant/layout/animation/hero/card/button/font | `Skill(impeccable)` `Skill(taste-skill)` `Skill(emil-design-eng)` |
-| review/audit | `Skill(code-review)` |
-| test/tdd/coverage | `Skill(tdd-workflow)` |
-| bug/crash/erreur/debug | `Skill(systematic-debugging)` |
-| auth/token/password/API key | `Skill(security)` |
-| plan/feature/architecture | `Skill(writing-plans)` `Skill(executing-plans)` |
-| check/qa/verif/deploy | `Skill(verify)` |
+## Règle fondamentale — Skills always-on
+
+**AVANT chaque réponse**, identifier la catégorie de tâche et invoquer le skill approprié. Pas de mot-clé requis — analyser l'INTENTION.
+
+| Catégorie | Skills | Exemples d'intention |
+|---|---|---|
+| UI / design / visuel | `Skill(impeccable)` `Skill(taste-skill)` `Skill(emil-design-eng)` | créer page, refaire UI, améliorer design, composant, animation |
+| Revue / qualité | `Skill(code-review)` | relire code, refactorer, optimiser, inspecter PR |
+| Tests | `Skill(tdd-workflow)` | écrire tests, coverage, spec, E2E |
+| Debug / fix | `Skill(systematic-debugging)` | bug, crash, erreur, ne fonctionne pas |
+| Sécurité | `Skill(security)` | auth, tokens, clés, permissions, vulnérabilités |
+| Plan / architecture | `Skill(writing-plans)` `Skill(executing-plans)` | nouvelle feature, conception, comment implémenter |
+| Vérification | `Skill(verify)` | vérifier avant push, QA, CI, deploy |
+| Vidéo / ads / motion | `Skill(video-generation)` | pub, ad, teaser, motion design, animation vidéo, Pika, Hyperframes |
+
+Si le hook `[AUTO-SKILL]` ou `⚡ SKILLS REQUIS` précise des skills : invoquer IMMÉDIATEMENT.
+
+## Self-learning
+
+Les learnings accumulés sont injectés automatiquement. Les appliquer sans question.
 
 ## Output
-- Réponses courtes par défaut. Pas de prose inutile.
-- Pas de résumé de ce qui vient d'être fait sauf si demandé.
-- Pas d'explication de code évident.
-- Code: zéro commentaire sauf WHY non-obvious.
+- Réponses courtes. Pas de prose. Pas de résumé sauf demandé. Zéro commentaire code sauf WHY non-obvious.
 
 ## MCPs
 - `magic` → composants 21st.dev
 - `playwright` → browser/E2E
-- `context7` → docs live (ajouter "use context7")
+- `context7` → docs live
 
-## Design — interdictions
-- Pas de `transition-all` / `background-clip:text` / Inter font / glassmorphism
+## Vidéo / Ads
+- `Pika` → ads IA, teaser, vidéo depuis prompt. API key: `$PIKA_API_KEY`
+- `Hyperframes` → motion design HTML→vidéo. CLI: `npx hyperframes render`
+- Voir `Skill(video-generation)` pour workflow complet
+
+## Design — interdictions absolues
+- NO `transition-all` / `background-clip:text` / Inter font / glassmorphism
 - Framer Motion easing: `cubic-bezier(0.16,1,0.3,1)`. Press: `scale(0.97)`.
-
-## Mémoire Obsidian
-`OBSIDIAN_VAULT` dans `.env.local`. Hook inject-context actif.
-Logger: `node .claude/scripts/obsidian.js append "$OBSIDIAN_VAULT/Sessions/YYYY-MM-DD.md" "## HH:MM — [action]"`
 
 ## Commits
 `feat|fix|refactor: desc` — Pas de Co-Authored-By.

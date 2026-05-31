@@ -8,6 +8,7 @@ const api = window.api
 let currentScreen = 1
 let magicKey = ''
 let obsidianKey = ''
+let pikaKey = ''
 let openAfterInstall = true
 let checksOk = false
 
@@ -73,7 +74,6 @@ const CHECKS = [
     name: 'Claude Code',
     cmd: 'claude --version',
     parse: (out, err) => {
-      // claude --version might output to stderr on some versions
       const combined = out || err || ''
       if (combined.includes('claude') || combined.match(/\d+\.\d+/)) {
         return { ok: true, detail: combined.split('\n')[0] || 'détecté' }
@@ -81,6 +81,17 @@ const CHECKS = [
       return { ok: false, detail: 'non détecté' }
     },
     linkId: 'link-claude'
+  },
+  {
+    id: 'gh',
+    name: 'GitHub CLI (gh)',
+    cmd: 'gh --version',
+    parse: (out) => {
+      if (!out) return { ok: false, detail: 'non détecté — sera installé' }
+      return { ok: true, detail: out.split('\n')[0] }
+    },
+    linkId: null,
+    optional: true
   }
 ]
 
@@ -122,12 +133,11 @@ async function runChecks() {
       itemEl.classList.add('success')
       detailEl.textContent = parsed.detail
     } else {
-      statusEl.innerHTML = '✗'
-      statusEl.className = 'check-status error'
-      itemEl.classList.add('error')
+      statusEl.innerHTML = check.optional ? '~' : '✗'
+      statusEl.className = `check-status ${check.optional ? 'warning' : 'error'}`
+      itemEl.classList.add(check.optional ? 'warning' : 'error')
       detailEl.textContent = parsed.detail
-      allOk = false
-      // Show relevant link
+      if (!check.optional) allOk = false
       if (check.linkId) {
         const linkEl = $(check.linkId)
         if (linkEl) linkEl.style.display = 'flex'
@@ -164,6 +174,7 @@ $('btn-skip-prereq').addEventListener('click', () => goTo(3))
 $('btn-install').addEventListener('click', () => {
   magicKey = $('input-magic-key').value.trim()
   obsidianKey = $('input-obsidian-key').value.trim()
+  pikaKey = $('input-pika-key').value.trim()
   openAfterInstall = $('check-open-claude').checked
   goTo(4)
   runInstallation()
@@ -258,6 +269,18 @@ function buildSteps() {
     {
       label: 'Configuration MCP playwright',
       cmd: 'claude mcp add playwright --scope user -- npx @playwright/mcp@latest'
+    },
+    {
+      label: 'Installation Hyperframes (motion design)',
+      cmd: 'npm install -g hyperframes'
+    },
+    {
+      label: 'Installation GitHub CLI (gh)',
+      cmd: process.platform === 'win32'
+        ? 'winget install --id GitHub.cli -e --source winget'
+        : process.platform === 'darwin'
+          ? 'brew install gh'
+          : 'npm install -g @github/gh'
     }
   )
 
@@ -269,11 +292,36 @@ function buildSteps() {
     })
   }
 
-  steps.push({
-    label: 'Finalisation...',
-    fake: 600,
-    cmd: null
-  })
+  // Pika key — write to .env.local via env var (handled in setup-project)
+  if (pikaKey) {
+    steps.push({
+      label: 'Configuration Pika API key',
+      fake: 400,
+      cmd: null,
+      pikaKey
+    })
+  }
+
+  // Verification — check installed plugins/MCPs are reachable
+  steps.push(
+    {
+      label: 'Vérification plugins installés',
+      cmd: 'claude plugin list'
+    },
+    {
+      label: 'Vérification MCPs configurés',
+      cmd: 'claude mcp list'
+    },
+    {
+      label: 'Vérification Hyperframes',
+      cmd: 'hyperframes --version'
+    },
+    {
+      label: 'Finalisation...',
+      fake: 600,
+      cmd: null
+    }
+  )
 
   return steps
 }
@@ -321,8 +369,9 @@ async function runInstallation() {
       if (result.success) {
         logLine(`  ✓ Terminé`, 'success')
       } else {
-        logLine(`  ✗ Erreur: ${result.error || 'commande échouée'}`, 'error')
-        installErrors++
+        const errMsg = result.error || 'commande échouée'
+        logLine(`  ✗ Erreur: ${errMsg}`, step.optional ? 'warning' : 'error')
+        if (!step.optional) installErrors++
       }
 
       // Small pause between commands

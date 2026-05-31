@@ -23,7 +23,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"const d=[];process.stdin.on('data',c=>d.push(c));process.stdin.on('end',()=>{try{const i=JSON.parse(Buffer.concat(d));const m=(i.message||'').toLowerCase();const skills=[];if(/design|page|ui|composant|component|landing|dashboard|redesign|style|layout|couleur|animation|hero|section|card|button|fond|police|font|refaire|refait/i.test(m))skills.push('Skill(impeccable) + Skill(taste-skill) + Skill(emil-design-eng)');if(/review|audit|verif|qualit|check|revu/i.test(m)&&!/design/.test(m))skills.push('Skill(code-review)');if(/test|tdd|coverage/i.test(m))skills.push('Skill(tdd-workflow)');if(/debug|crash|error|bug|erreur|plante|broken/i.test(m))skills.push('Skill(systematic-debugging)');if(/s[eé]curit|auth|token|password|mot de passe|api.?key/i.test(m))skills.push('Skill(security)');if(/plan|architect|feature|fonctionnalit[eé]|comment impl/i.test(m))skills.push('Skill(writing-plans)');if(skills.length){console.log('[AUTO-SKILL] Invoquer: '+skills.join(' | '))}}catch(e){}})\""
+            "command": "node --no-warnings \"$CLAUDE_PROJECT_DIR/.claude/scripts/skill-router.js\""
           }
         ]
       }
