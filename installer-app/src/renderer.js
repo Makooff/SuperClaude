@@ -2,7 +2,8 @@
 //  SuperClaude Installer — renderer.js
 // ============================================================
 
-const api = window.api
+/* global api */
+// `api` is injected by preload.js via contextBridge — do not redeclare
 
 // --- State ---
 let currentScreen = 1
