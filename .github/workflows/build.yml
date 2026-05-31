@@ -1,77 +1,66 @@
-name: Build & Release SuperClaude Installer
+name: Build SuperClaude Installer
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
     paths:
       - 'installer-app/**'
-
-permissions:
-  contents: write
+  workflow_dispatch:
 
 jobs:
   build-windows:
     name: Build Windows (.exe)
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: installer-app/package.json
 
-      - name: Install Wine + dependencies
-        run: |
-          sudo dpkg --add-architecture i386
-          sudo apt-get update -qq
-          sudo apt-get install -y wine wine32 wine64 libwine libwine:i386 fonts-wine
-
-      - name: Install node dependencies
+      - name: Install dependencies
         working-directory: installer-app
         run: npm install
 
       - name: Build Windows installer
         working-directory: installer-app
         run: npm run build-win
-        env:
-          WINE: wine
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: windows-exe
+          name: SuperClaude-Installer-Windows
           path: installer-app/dist/*.exe
-          if-no-files-found: warn
+          retention-days: 30
 
-  release:
-    name: Publish Release
-    needs: [build-windows]
-    runs-on: ubuntu-latest
+  build-macos:
+    name: Build macOS (.dmg)
+    runs-on: macos-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          name: windows-exe
-          path: dist/
-        continue-on-error: true
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: installer-app/package.json
 
-      - name: List dist
-        run: ls -la dist/ || echo "No files"
+      - name: Install dependencies
+        working-directory: installer-app
+        run: npm install
 
-      - uses: softprops/action-gh-release@v2
+      - name: Build macOS installer
+        working-directory: installer-app
+        run: npm run build-mac
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: latest
-          name: SuperClaude latest
-          prerelease: true
-          body: |
-            ## SuperClaude Installer
-
-            | Plateforme | Fichier | Instructions |
-            |------------|---------|--------------|
-            | **Windows** | `.exe` | Double-cliquer pour installer |
-            | **Mac** | `SuperClaude-Installer.command` | `chmod +x` puis double-cliquer |
-
-            Configure automatiquement : plugins Claude Code, MCP servers, hooks Obsidian.
-          files: dist/*
-          fail_on_unmatched_files: false
+          name: SuperClaude-Installer-macOS
+          path: installer-app/dist/*.dmg
+          retention-days: 30

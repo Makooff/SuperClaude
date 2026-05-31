@@ -22,7 +22,7 @@
       <!-- ====== Screen 1: Welcome ====== -->
       <div class="screen active" id="screen-1">
         <span class="welcome-icon">⚡</span>
-        <div class="welcome-logo">SuperClaude</div>
+        <div class="welcome-logo">Super<span class="accent">Claude</span></div>
         <div class="welcome-subtitle">Config Claude Code complète.<br>Prête en 60 secondes.</div>
 
         <div class="features-list">
@@ -155,7 +155,21 @@
       </div>
 
       <!-- ====== Screen 5: Done ====== -->
-      <div class="screen" id="screen-5">
+      <!-- Screen 5 — Choisir le projet -->
+    <div class="screen" id="screen-5">
+      <div class="screen-content">
+        <div class="logo-mark">📁</div>
+        <h2 class="screen-title">Choisir le projet</h2>
+        <p class="screen-subtitle">SuperClaude copiera skills, MCPs et l'agent ultra dans ce dossier, puis ouvrira Claude Code.</p>
+        <button class="btn btn-primary" id="btn-pick-folder">Choisir le dossier projet →</button>
+        <div class="project-path" id="project-path" style="display:none"></div>
+        <button class="btn btn-primary" id="btn-setup-project" style="display:none;margin-top:12px">Installer dans ce projet & ouvrir Claude</button>
+        <div class="project-log" id="project-log"></div>
+      </div>
+    </div>
+
+    <!-- Screen 6 — Done -->
+    <div class="screen" id="screen-6">
         <div class="checkmark-wrap">
           <svg class="checkmark-svg" viewBox="0 0 80 80">
             <circle

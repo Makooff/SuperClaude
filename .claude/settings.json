@@ -52,13 +52,29 @@
     "claude-md-management@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true,
-    "playwright@claude-plugins-official": true
+    "playwright@claude-plugins-official": true,
+    "comprehensive-review@agents": true,
+    "debugging-toolkit@agents": true,
+    "unit-testing@agents": true,
+    "security-scanning@agents": true,
+    "full-stack-orchestration@agents": true,
+    "frontend-mobile-development@agents": true,
+    "ui-design@agents": true,
+    "cicd-automation@agents": true,
+    "agent-orchestration@agents": true,
+    "application-performance@agents": true
   },
   "extraKnownMarketplaces": {
     "caveman": {
       "source": {
         "source": "github",
         "repo": "JuliusBrussee/caveman"
+      }
+    },
+    "agents": {
+      "source": {
+        "source": "github",
+        "repo": "wshobson/agents"
       }
     }
   },

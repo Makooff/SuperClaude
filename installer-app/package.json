@@ -10,28 +10,25 @@
     "build-mac": "electron-builder --mac"
   },
   "devDependencies": {
-    "electron": "^33.0.0",
-    "electron-builder": "^25.0.0"
+    "electron": "^31.0.0",
+    "electron-builder": "^24.0.0"
   },
   "build": {
     "appId": "com.superclaude.installer",
     "productName": "SuperClaude Installer",
     "directories": { "output": "dist" },
     "win": {
-      "target": "portable"
+      "target": "nsis",
+      "icon": "assets/icon.ico"
     },
     "mac": {
       "target": "dmg",
+      "icon": "assets/icon.icns",
       "category": "public.app-category.developer-tools"
     },
     "nsis": {
       "oneClick": true,
-      "perMachine": false,
-      "installerLanguages": ["fr_FR", "en_US"]
-    },
-    "linux": {
-      "target": "AppImage"
+      "perMachine": false
     }
   }
 }
-
