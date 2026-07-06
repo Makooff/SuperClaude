@@ -17,6 +17,8 @@
 
 ---
 
+> **Tu es Claude/un agent ?** Lis [`AGENTS.md`](AGENTS.md) et exécute la procédure « installe et active ce setup ».
+
 ## Install en une ligne
 
 **macOS / Linux**
