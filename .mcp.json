@@ -14,6 +14,14 @@
     "context7": {
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp"]
+    },
+    "claude-mem": {
+      "command": "npx",
+      "args": ["-y", "claude-mem"]
+    },
+    "graphify": {
+      "command": "npx",
+      "args": ["-y", "graphify-mcp"]
     }
   }
 }

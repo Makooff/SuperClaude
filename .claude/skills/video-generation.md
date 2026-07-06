@@ -1,6 +1,6 @@
 ---
 name: video-generation
-description: Génération vidéo pub/ads avec Pika API et motion design HTML avec Hyperframes CLI
+description: Génération vidéo pub/ads avec Pika API, motion design HTML avec Hyperframes CLI, et vidéo programmable React avec Remotion. Trigger sur vidéo, ad, teaser, spot, motion, explainer, remotion, Pika, Hyperframes.
 ---
 
 # Video Generation Skill
@@ -79,15 +79,48 @@ hyperframes render composition.html \
 
 ---
 
+### Remotion — Vidéo programmable React
+Framework React → MP4. Chaque frame est un composant. Idéal pour vidéos longues, data-driven, ou personnalisées à la volée (une vidéo par client/produit).
+
+**Installer :**
+```bash
+npx create-video@latest
+```
+
+**Composant scène :**
+```tsx
+import { useCurrentFrame, interpolate, AbsoluteFill } from 'remotion'
+
+export const Scene = () => {
+  const frame = useCurrentFrame()
+  const opacity = interpolate(frame, [0, 30], [0, 1], { extrapolateRight: 'clamp' })
+  return (
+    <AbsoluteFill style={{ background: '#09090b', justifyContent: 'center', alignItems: 'center' }}>
+      <h1 style={{ color: '#f5f5f5', opacity, fontFamily: 'Outfit' }}>Titre</h1>
+    </AbsoluteFill>
+  )
+}
+```
+
+**Render :**
+```bash
+npx remotion render src/index.ts MyComp out.mp4
+```
+
+Motion : appliquer `Skill(emil-design-eng)` — transform/opacity, easing fortes, durées cohérentes.
+
+---
+
 ## Quand utiliser quoi
 
 | Besoin | Outil |
 |---|---|
-| Pub produit, teaser, ad IA | Pika |
+| Pub produit, teaser, ad IA (depuis prompt) | Pika |
 | Intro animée, titre, motion logo | Hyperframes |
-| Explainer animé avec texte/code | Hyperframes |
+| Explainer court, séquence HTML pixel-perfect | Hyperframes |
 | Vidéo depuis image/texte pur | Pika |
-| Séquence HTML pixel-perfect | Hyperframes |
+| Explainer long, dataviz animée, vidéo par client (data-driven) | Remotion |
+| Composition React réutilisable | Remotion |
 
 ## Workflow pub complète
 

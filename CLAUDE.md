@@ -6,16 +6,26 @@
 
 | Catégorie | Skills | Exemples d'intention |
 |---|---|---|
-| UI / design / visuel | `Skill(impeccable)` `Skill(taste-skill)` `Skill(emil-design-eng)` | créer page, refaire UI, améliorer design, composant, animation |
+| Design produit / flow | `Skill(product-design)` | flow utilisateur, onboarding, dashboard, settings, revoir un écran |
+| UI / design / visuel | `Skill(product-design)` `Skill(impeccable)` `Skill(taste-skill)` | créer page, refaire UI, composant, hero, layout |
+| Animation / motion | `Skill(emil-design-eng)` `Skill(review-animations)` | transition, easing, micro-interaction, "feel weird", polish |
 | Revue / qualité | `Skill(code-review)` | relire code, refactorer, optimiser, inspecter PR |
 | Tests | `Skill(tdd-workflow)` | écrire tests, coverage, spec, E2E |
 | Debug / fix | `Skill(systematic-debugging)` | bug, crash, erreur, ne fonctionne pas |
 | Sécurité | `Skill(security)` | auth, tokens, clés, permissions, vulnérabilités |
 | Plan / architecture | `Skill(writing-plans)` `Skill(executing-plans)` | nouvelle feature, conception, comment implémenter |
 | Vérification | `Skill(verify)` | vérifier avant push, QA, CI, deploy |
-| Vidéo / ads / motion | `Skill(video-generation)` | pub, ad, teaser, motion design, animation vidéo, Pika, Hyperframes |
+| Discipline agentic | `Skill(agentic-practice)` | avant commit/push, proprement, production-ready |
+| Prose / rédaction | `Skill(prose-clean)` | blog, README, doc, email, "sans IA", réécris |
+| Marketing / growth | `Skill(marketing-growth)` | landing, ad copy, CRO, conversion, funnel, SEO |
+| Recherche web | `Skill(web-research)` | compare, benchmark, tendance, "que disent les gens" |
+| Multi-agent / orchestration | `Skill(context-engineering)` | décompose, workflow complexe, audit exhaustif, migration |
+| Vidéo / ads / motion | `Skill(video-generation)` | pub, teaser, spot, Pika, Hyperframes, Remotion |
+| Agence Nova | `Skill(nova-agency)` | spot, campagne Meta/Google, site client, SEO local, agent IA |
 
-Si le hook `[AUTO-SKILL]` ou `⚡ SKILLS REQUIS` précise des skills : invoquer IMMÉDIATEMENT.
+**Combiner, pas prioriser.** Chaque skill a un rôle distinct — les invoquer ensemble sans doublon. `product-design` est le hub design ; `impeccable`/`taste-skill` exécutent ; `emil-design-eng`/`review-animations` gèrent le motion.
+
+Si le hook `⚡ SKILLS REQUIS` / `⚡ SKILLS DISPONIBLES` précise des skills : invoquer IMMÉDIATEMENT.
 
 ## Self-learning
 
@@ -24,10 +34,12 @@ Les learnings accumulés sont injectés automatiquement. Les appliquer sans ques
 ## Output
 - Réponses courtes. Pas de prose. Pas de résumé sauf demandé. Zéro commentaire code sauf WHY non-obvious.
 
-## MCPs
+## MCPs (tous auto-actifs)
 - `magic` → composants 21st.dev
 - `playwright` → browser/E2E
 - `context7` → docs live
+- `claude-mem` → mémoire persistante cross-session
+- `graphify` → knowledge graph
 
 ## Vidéo / Ads
 - `Pika` → ads IA, teaser, vidéo depuis prompt. API key: `$PIKA_API_KEY`
