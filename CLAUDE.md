@@ -27,6 +27,12 @@
 
 Si le hook `⚡ SKILLS REQUIS` / `⚡ SKILLS DISPONIBLES` précise des skills : invoquer IMMÉDIATEMENT.
 
+## Économie de tokens (always-on)
+- **Lecture lourde → sous-agent.** Recherche/exploration/mapping : déléguer via Explore/Task, garder la conclusion, pas les extraits bruts. Voir `Skill(context-engineering)`.
+- Ne pas relire un fichier déjà édité pour « vérifier » (le harness confirme l'édition).
+- Ne pas relancer une recherche déjà déléguée — attendre le résultat.
+- `caveman` compresse l'output. Réponses courtes, zéro prose de remplissage.
+
 ## Self-learning
 
 Les learnings accumulés sont injectés automatiquement. Les appliquer sans question.

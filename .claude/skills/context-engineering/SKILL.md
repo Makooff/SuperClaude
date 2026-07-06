@@ -12,6 +12,18 @@ description: >-
 
 Structure work across agents to be comprehensive (cover in parallel), confident (independent verification), or bigger than one context (migrations, audits). The skill is deciding what fans out, what verifies, and what synthesizes.
 
+## Objectif n°1 : économiser les tokens du thread principal
+
+Déléguer = payer moins. Chaque sous-agent lit dans **son propre contexte** et ne renvoie que la **conclusion** — le thread principal ne charge jamais les fichiers bruts. Concrètement :
+
+- **Lecture lourde → sous-agent.** « Où est défini X », « mappe ce dossier », « liste les usages de Y » : envoie un sous-agent (Explore/Task), garde le résumé, pas les extraits.
+- **Ne relance pas une recherche déjà déléguée.** Attends le résultat du sous-agent au lieu de la refaire toi-même.
+- **Retourne des données structurées** (schéma), pas de la prose, quand le parent doit agir dessus.
+- **Un brief étroit par agent** — il raisonne mieux sur un contexte qu'il tient d'un coup, et te renvoie moins de bruit.
+- **Résultat net :** le thread principal reste léger même sur une tâche qui touche 50 fichiers. C'est l'inverse de tout lire soi-même.
+
+Règle simple : *si la réponse tient en 5 lignes mais exige de lire 2000 lignes, délègue la lecture.*
+
 ## When to reach for it
 
 - The task names multiple independent subsystems.
