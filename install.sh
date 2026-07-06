@@ -85,9 +85,57 @@ else
 fi
 ok "5 MCP configurés"
 
+# 5b. Repos communauté (clone à l'install) ----------------------------------
+VENDOR="$DEST/vendor"
+SKILLS_VENDOR="$CLAUDE_DIR/skills/vendor"
+say "Clonage des repos communauté → $VENDOR…"
+mkdir -p "$VENDOR" "$SKILLS_VENDOR"
+
+COMMUNITY=(
+  "hardikpandya/stop-slop"
+  "coreyhaines31/marketingskills"
+  "muratcankoylan/Agent-Skills-for-Context-Engineering"
+  "shanraisshan/claude-code-best-practice"
+  "Panniantong/Agent-Reach"
+)
+for repo in "${COMMUNITY[@]}"; do
+  name="${repo##*/}"
+  target="$VENDOR/$name"
+  if [ -d "$target/.git" ]; then
+    git -C "$target" pull --ff-only 2>/dev/null || true
+  else
+    git clone --depth 1 "https://github.com/$repo" "$target" 2>/dev/null \
+      && ok "cloné $repo" || warn "échec clone $repo (non bloquant)"
+  fi
+  # namespacer les skills du repo sans écraser nos 15 skills
+  if [ -d "$target/skills" ]; then
+    mkdir -p "$SKILLS_VENDOR/$name"
+    cp -R "$target/skills/." "$SKILLS_VENDOR/$name/" 2>/dev/null || true
+  fi
+done
+
+# stop-slop est un skill à la racine (SKILL.md + references/)
+if [ -f "$VENDOR/stop-slop/SKILL.md" ]; then
+  mkdir -p "$SKILLS_VENDOR/stop-slop"
+  cp -R "$VENDOR/stop-slop/SKILL.md" "$VENDOR/stop-slop/references" "$SKILLS_VENDOR/stop-slop/" 2>/dev/null || true
+fi
+
+# marketplaces Claude natives pour les repos qui sont des plugins
+claude plugin marketplace add coreyhaines31/marketingskills 2>/dev/null || true
+claude plugin marketplace add muratcankoylan/Agent-Skills-for-Context-Engineering 2>/dev/null || true
+ok "5 repos communauté clonés + namespacés"
+
+# Agent-Reach — CLI Python (recherche web multi-plateforme, zéro clé API)
+if have pip || have pip3; then
+  say "Installation d'Agent-Reach (CLI web)…"
+  (pip install agent-reach 2>/dev/null || pip3 install agent-reach 2>/dev/null \
+    || pipx install agent-reach 2>/dev/null) && ok "agent-reach installé" \
+    || warn "agent-reach non installé (pip absent — non bloquant)"
+fi
+
 # 6. Utilitaires globaux ----------------------------------------------------
-say "Outils vidéo/mémoire (hyperframes, claude-mem, graphify)…"
-npm install -g hyperframes claude-mem graphify-mcp 2>/dev/null || warn "npm -g partiel (non bloquant)"
+say "Outils vidéo/mémoire (hyperframes, remotion, claude-mem, graphify)…"
+npm install -g hyperframes remotion claude-mem graphify-mcp 2>/dev/null || warn "npm -g partiel (non bloquant)"
 
 # 7. Clé Magic (optionnel) --------------------------------------------------
 if [ -t 0 ]; then
@@ -105,6 +153,7 @@ cat <<'EOF'
 ────────────────────────────────────────────
   ✓ SuperClaude installé
   ✓ 22 plugins   ✓ 15 skills   ✓ 5 MCP
+  ✓ 5 repos communauté clonés (~/.superclaude/vendor)
   ✓ Auto-routing actif (skills invoqués tout seuls)
 
   Lance :  claude

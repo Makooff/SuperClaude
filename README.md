@@ -214,6 +214,19 @@ Le mot `design` détecte automatiquement → invoque `impeccable` + `taste-skill
 
 *Combinés, pas priorisés — chacun un rôle distinct. Voir [docs/AUTO-ROUTING.md](docs/AUTO-ROUTING.md).*
 
+### Repos communauté (clonés à l'install → `~/.superclaude/vendor/`)
+
+| Repo | Intégration |
+|---|---|
+| [`stop-slop`](https://github.com/hardikpandya/stop-slop) | skill anti-slop (vendor) + `prose-clean` always-on |
+| [`marketingskills`](https://github.com/coreyhaines31/marketingskills) | marketplace Claude + `marketing-growth` |
+| [`Agent-Skills-for-Context-Engineering`](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering) | marketplace Claude + `context-engineering` |
+| [`Agent-Reach`](https://github.com/Panniantong/Agent-Reach) | `pip install agent-reach` (CLI web) + `web-research` |
+| [`claude-code-best-practice`](https://github.com/shanraisshan/claude-code-best-practice) | clone vendor + `agentic-practice` |
+| [`remotion`](https://github.com/remotion-dev/remotion) | `npm i remotion` + `video-generation` |
+
+Le vrai code de chaque repo est cloné localement ; nos skills SuperClaude restent la couche always-on qui les route sans doublon.
+
 ### MCP servers (5 — tous auto-actifs)
 
 | MCP | Invocation |

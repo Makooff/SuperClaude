@@ -76,9 +76,59 @@ if (Test-Path $mcpDst) {
 }
 Ok '5 MCP configurés'
 
+# 5b. Repos communauté (clone à l'install)
+$Vendor      = Join-Path $Dest 'vendor'
+$SkillsVendor = Join-Path $ClaudeDir 'skills\vendor'
+Say "Clonage des repos communauté → $Vendor…"
+New-Item -ItemType Directory -Force -Path $Vendor       | Out-Null
+New-Item -ItemType Directory -Force -Path $SkillsVendor | Out-Null
+
+$community = @(
+  'hardikpandya/stop-slop',
+  'coreyhaines31/marketingskills',
+  'muratcankoylan/Agent-Skills-for-Context-Engineering',
+  'shanraisshan/claude-code-best-practice',
+  'Panniantong/Agent-Reach'
+)
+foreach ($repo in $community) {
+  $name   = $repo.Split('/')[-1]
+  $target = Join-Path $Vendor $name
+  if (Test-Path (Join-Path $target '.git')) {
+    git -C $target pull --ff-only 2>$null
+  } else {
+    git clone --depth 1 "https://github.com/$repo" $target 2>$null
+    if ($?) { Ok "cloné $repo" } else { Warn "échec clone $repo (non bloquant)" }
+  }
+  $skillsDir = Join-Path $target 'skills'
+  if (Test-Path $skillsDir) {
+    $ns = Join-Path $SkillsVendor $name
+    New-Item -ItemType Directory -Force -Path $ns | Out-Null
+    Copy-Item (Join-Path $skillsDir '*') $ns -Recurse -Force -ErrorAction SilentlyContinue
+  }
+}
+# stop-slop : skill à la racine
+$ss = Join-Path $Vendor 'stop-slop\SKILL.md'
+if (Test-Path $ss) {
+  $nsss = Join-Path $SkillsVendor 'stop-slop'
+  New-Item -ItemType Directory -Force -Path $nsss | Out-Null
+  Copy-Item (Join-Path $Vendor 'stop-slop\SKILL.md')   $nsss -Force -ErrorAction SilentlyContinue
+  Copy-Item (Join-Path $Vendor 'stop-slop\references') $nsss -Recurse -Force -ErrorAction SilentlyContinue
+}
+# marketplaces Claude natives
+claude plugin marketplace add coreyhaines31/marketingskills 2>$null
+claude plugin marketplace add muratcankoylan/Agent-Skills-for-Context-Engineering 2>$null
+Ok '5 repos communauté clonés + namespacés'
+
+# Agent-Reach — CLI Python
+if ((Have 'pip') -or (Have 'pip3') -or (Have 'pipx')) {
+  Say "Installation d'Agent-Reach (CLI web)…"
+  pip install agent-reach 2>$null; if (-not $?) { pipx install agent-reach 2>$null }
+  Ok 'agent-reach installé (si pip présent)'
+}
+
 # 6. Utilitaires globaux
-Say 'Outils vidéo/mémoire…'
-npm install -g hyperframes claude-mem graphify-mcp 2>$null
+Say 'Outils vidéo/mémoire (hyperframes, remotion, claude-mem, graphify)…'
+npm install -g hyperframes remotion claude-mem graphify-mcp 2>$null
 
 # 7. Clé Magic (optionnel)
 $magic = Read-Host 'Clé API 21st.dev Magic (Entrée pour ignorer)'
@@ -89,6 +139,7 @@ Write-Host ''
 Write-Host '────────────────────────────────────────────' -ForegroundColor Magenta
 Write-Host '  ✓ SuperClaude installé' -ForegroundColor Green
 Write-Host '  ✓ 22 plugins   ✓ 15 skills   ✓ 5 MCP'
+Write-Host '  ✓ 5 repos communauté clonés (~/.superclaude/vendor)'
 Write-Host '  ✓ Auto-routing actif (skills invoqués tout seuls)'
 Write-Host ''
 Write-Host '  Lance :  claude'

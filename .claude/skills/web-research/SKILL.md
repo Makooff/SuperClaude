@@ -40,4 +40,15 @@ Give the agent eyes on the whole internet using `WebSearch` + `WebFetch` — zer
 - **Flag uncertainty.** If sources conflict and you can't resolve it, say so.
 - **No hallucinated sources.** If you didn't fetch it, don't cite it.
 
-For deep, multi-round reports, escalate to `Skill(deep-research)` when available (parallel fan-out + verification harness). This skill is the always-on lightweight path.
+## Agent-Reach CLI (optionnel)
+
+Si `agent-reach` est installé (l'install SuperClaude le pose via pip), il donne un accès CLI direct à Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu — zéro clé API :
+
+```bash
+agent-reach search "<requête>" --platform reddit
+agent-reach read <url>
+```
+
+Utilise-le en priorité pour Reddit/YouTube/X quand disponible ; sinon retombe sur `WebSearch`/`WebFetch`.
+
+Pour des rapports profonds multi-tours, escalade vers `Skill(deep-research)` quand disponible (fan-out parallèle + vérification). Ce skill est le chemin léger always-on.
