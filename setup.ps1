@@ -39,7 +39,9 @@ if (-not $claudeOk) {
 # --- Install plugins ---
 Write-Host ""
 Write-Host "[1/3] Installation plugins Claude Code..." -ForegroundColor Yellow
-$plugins = @("superpowers", "impeccable", "taste-skill", "caveman", "claude-mem", "context7", "playwright")
+# NB: impeccable/taste-skill sont des skills locaux (pas des plugins marketplace) —
+# ils sont copiés dans ~/.claude/skills plus bas, pas installés via plugin.
+$plugins = @("superpowers", "caveman", "claude-mem", "context7", "playwright")
 foreach ($p in $plugins) {
     Write-Host "  Installing $p..." -ForegroundColor Gray
     claude plugin install $p 2>&1 | Out-Null
@@ -48,6 +50,15 @@ foreach ($p in $plugins) {
     } else {
         Write-Host "  WARN: $p (deja installe ou erreur, on continue)" -ForegroundColor DarkYellow
     }
+}
+
+# --- Skills locaux (impeccable, taste-skill, product-design, etc.) ---
+$skillsSrc = Join-Path $PSScriptRoot ".claude\skills"
+$skillsDst = Join-Path $HOME ".claude\skills"
+if (Test-Path $skillsSrc) {
+    New-Item -ItemType Directory -Force -Path $skillsDst | Out-Null
+    Copy-Item (Join-Path $skillsSrc '*') $skillsDst -Recurse -Force -ErrorAction SilentlyContinue
+    Write-Host "  OK: skills locaux copies vers ~/.claude/skills" -ForegroundColor Green
 }
 
 # --- Magic API key ---

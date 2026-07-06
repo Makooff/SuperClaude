@@ -35,7 +35,9 @@ echo -e "${GREEN}  OK: Claude Code $(claude --version)${NC}"
 # --- Install plugins ---
 echo ""
 echo -e "${YELLOW}[1/3] Installation plugins Claude Code...${NC}"
-plugins=("superpowers" "impeccable" "taste-skill" "caveman" "claude-mem" "context7" "playwright")
+# NB: impeccable/taste-skill sont des skills locaux (pas des plugins marketplace) —
+# copiés dans ~/.claude/skills ci-dessous, pas installés via plugin.
+plugins=("superpowers" "caveman" "claude-mem" "context7" "playwright")
 for p in "${plugins[@]}"; do
     echo -e "${GRAY}  Installing $p...${NC}"
     if claude plugin install "$p" &> /dev/null; then
@@ -44,6 +46,14 @@ for p in "${plugins[@]}"; do
         echo -e "${DARKYELLOW}  WARN: $p (deja installe ou erreur, on continue)${NC}"
     fi
 done
+
+# --- Skills locaux ---
+SKILLS_SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.claude/skills"
+if [ -d "$SKILLS_SRC" ]; then
+    mkdir -p "$HOME/.claude/skills"
+    cp -R "$SKILLS_SRC/." "$HOME/.claude/skills/" 2>/dev/null || true
+    echo -e "${GREEN}  OK: skills locaux copiés vers ~/.claude/skills${NC}"
+fi
 
 # --- Magic API key ---
 echo ""
