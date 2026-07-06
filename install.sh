@@ -57,7 +57,11 @@ claude plugin install claude-mem@thedotmack 2>/dev/null || true
 PACKS=(comprehensive-review debugging-toolkit unit-testing security-scanning \
        full-stack-orchestration frontend-mobile-development ui-design \
        cicd-automation agent-orchestration application-performance)
-for p in "${PACKS[@]}"; do claude plugin install "$p@agents" 2>/dev/null || true; done
+# wshobson/agents s'enregistre sous le nom de marketplace "claude-code-workflows".
+for p in "${PACKS[@]}"; do
+  claude plugin install "$p@claude-code-workflows" 2>/dev/null \
+    || claude plugin install "$p" 2>/dev/null || true
+done
 ok "Plugins installés (22)"
 
 # 4. Skills + scripts + hooks ----------------------------------------------
