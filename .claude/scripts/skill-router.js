@@ -30,8 +30,11 @@ process.stdin.on('end', () => {
       ? '⚡ SKILLS DISPONIBLES — chacun dans son rôle, invoquer ceux qui s\'appliquent:'
       : '⚡ SKILLS REQUIS — invoquer AVANT de répondre:'
     lines.push(header)
-    tasks.forEach(t => lines.push(`  → ${t.skill}  [${t.reason}]`))
-    lines.push('Combiner les skills (pas de doublon) : chaque skill a un rôle distinct.')
+    tasks.forEach(t => {
+      const toolPart = t.tool ? ` [+ ${t.tool}]` : ''
+      lines.push(`  → ${t.skill}${toolPart}  [${t.reason}]`)
+    })
+    lines.push('Reste = à la demande uniquement, rien d\'autre par défaut (noyau: caveman/superpowers/context-engineering/graphify).')
   }
 
   // Inject accumulated learnings snippet
@@ -51,13 +54,13 @@ process.stdin.on('end', () => {
 // Lower index = higher priority (listed first in output).
 const PRIORITY = [
   'security', 'debug', 'product-design', 'design', 'animation', 'review',
-  'nova', 'research', 'marketing', 'prose', 'multiagent', 'video',
+  'nova', 'research', 'docs', 'marketing', 'prose', 'multiagent', 'video',
   'tests', 'plan', 'agentic', 'verify', 'feature',
 ]
 
 function classify(msg) {
   const hits = {}
-  const add = (key, skill, reason) => { hits[key] = { key, skill, reason } }
+  const add = (key, skill, reason, tool) => { hits[key] = { key, skill, reason, tool } }
 
   // Product design (Vercel) — hub for user-facing product work
   if (/product design|design review|revoir (le )?design|user experience|onboarding|settings page|dashboard|flow|parcours|usability|maquette|wireframe/.test(msg)) {
@@ -66,7 +69,7 @@ function classify(msg) {
 
   // Design / UI execution — broad semantic net
   if (/design|ui|ux|page|layout|composant|component|landing|hero|section|card|button|form|nav|sidebar|couleur|color|font|typo|icon|style|theme|dark|light|responsive|mobile|visual|interface|écran|screen|figma|sketch/.test(msg)) {
-    add('design', 'Skill(product-design) + Skill(impeccable) + Skill(taste-skill)', 'tâche UI/design détectée')
+    add('design', 'Skill(product-design) + Skill(impeccable) + Skill(taste-skill)', 'tâche UI/design détectée', 'MCP magic')
   }
 
   // Animation / motion
@@ -81,12 +84,14 @@ function classify(msg) {
 
   // Testing
   if (/test|tdd|spec|coverage|jest|vitest|playwright|cypress|unit|intégration|e2e/.test(msg)) {
-    add('tests', 'Skill(tdd-workflow)', 'tâche test détectée')
+    const tool = /e2e|playwright|navigat|screenshot|browser/.test(msg) ? 'MCP playwright' : undefined
+    add('tests', 'Skill(tdd-workflow)', 'tâche test détectée', tool)
   }
 
   // Debug / fix
   if (/debug|bug|crash|error|erreur|broken|fix|cass|plante|fail|issue|probl[eè]me|ne fonctionne|marche pas/.test(msg)) {
-    add('debug', 'Skill(systematic-debugging)', 'débogage détecté')
+    const tool = /navigat|browser|page web|screenshot|repro.*navig/.test(msg) ? 'MCP playwright' : undefined
+    add('debug', 'Skill(systematic-debugging)', 'débogage détecté', tool)
   }
 
   // Security
@@ -101,7 +106,8 @@ function classify(msg) {
 
   // Verification / deploy
   if (/v[eé]rif|check|qa|deploy|ci|cd|build|lint|test.*avant|avant.*push|pr[eê]t|ready/.test(msg)) {
-    add('verify', 'Skill(verify)', 'vérification/déploiement')
+    const tool = /visuel|screenshot|rendu|affich|ui/.test(msg) ? 'MCP playwright' : undefined
+    add('verify', 'Skill(verify)', 'vérification/déploiement', tool)
   }
 
   // Agentic practice — before commit/push, clean work
@@ -121,12 +127,18 @@ function classify(msg) {
 
   // Research
   if (/recherche|benchmark|compare|comparer|tendance|trend|que disent|avis sur|reviews? de|meilleur.*que|state of/.test(msg)) {
-    add('research', 'Skill(web-research)', 'recherche multi-source')
+    add('research', 'Skill(web-research)', 'recherche multi-source', 'CLI agent-reach (vendor) si présent, sinon WebSearch')
   }
 
-  // Multi-agent / orchestration
+  // Docs / bibliothèque précise → context7 (pas de skill dédié, juste le MCP)
+  if (/comment (utiliser|marche|fonctionne)|documentation de|docs? de|version de|api de|library|librairie|framework .* (version|api)/.test(msg)) {
+    add('docs', '(aucun skill requis)', 'doc lib/framework précise', 'MCP context7')
+  }
+
+  // Multi-agent / orchestration — insistance explicite (context-engineering est déjà
+  // toujours actif via CLAUDE.md ; cette regex sert juste à SIGNALER une intention forte)
   if (/orchestr|workflow complexe|d[eé]compose|multi-?agent|fais x puis|audit exhaustif|comprehensive|à grande échelle|migration/.test(msg)) {
-    add('multiagent', 'Skill(context-engineering)', 'orchestration multi-agent')
+    add('multiagent', 'Skill(context-engineering)', 'orchestration multi-agent — déjà actif, insister ici')
   }
 
   // Nova agency services
@@ -136,7 +148,7 @@ function classify(msg) {
 
   // Video / ads / motion production
   if (/vid[eé]o|motion.?design|ads?\b|teaser|trailer|spot|pika|hyperframes|remotion|render|composition|explainer/.test(msg)) {
-    add('video', 'Skill(video-generation)', 'vidéo/ads/motion')
+    add('video', 'Skill(video-generation)', 'vidéo/ads/motion', 'Pika / Hyperframes / Remotion')
   }
 
   // New feature (no other category matched)
