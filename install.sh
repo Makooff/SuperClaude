@@ -64,32 +64,67 @@ for p in "${PACKS[@]}"; do
 done
 ok "Plugins installés (22)"
 
-# 4. Skills + scripts + hooks ----------------------------------------------
-say "Copie des skills & hooks vers ~/.claude…"
+# 4. Skills + scripts --------------------------------------------------------
+say "Copie des skills vers ~/.claude…"
 mkdir -p "$CLAUDE_DIR/skills" "$CLAUDE_DIR/scripts"
 cp -R "$DEST/.claude/skills/." "$CLAUDE_DIR/skills/"
 cp -R "$DEST/.claude/scripts/." "$CLAUDE_DIR/scripts/" 2>/dev/null || true
 ok "15 skills + auto-router copiés"
 
-# 5. MCP servers ------------------------------------------------------------
-say "Configuration des MCP (magic, playwright, context7, claude-mem, graphify)…"
-MCP_SRC="$DEST/.mcp.json"
-MCP_DST="$CLAUDE_DIR/.mcp.json"
-if [ -f "$MCP_DST" ] && have node; then
-  node -e '
-    const fs=require("fs");
-    const dst=process.argv[1], src=process.argv[2];
-    const a=JSON.parse(fs.readFileSync(dst,"utf8"));
-    const b=JSON.parse(fs.readFileSync(src,"utf8"));
-    a.mcpServers=Object.assign({},a.mcpServers,b.mcpServers);
-    fs.writeFileSync(dst,JSON.stringify(a,null,2));
-  ' "$MCP_DST" "$MCP_SRC"
-else
-  cp "$MCP_SRC" "$MCP_DST"
-fi
-ok "5 MCP configurés"
+# 4b. Hooks — fusionner dans ~/.claude/settings.json (scope user) -----------
+# C'est ce fichier, pas juste les scripts, qui déclenche réellement le routeur
+# à chaque message. On fusionne sans écraser un settings.json existant.
+say "Activation des hooks (auto-routing) dans ~/.claude/settings.json…"
+SETTINGS_DST="$CLAUDE_DIR/settings.json"
+node -e '
+  const fs = require("fs");
+  const dst = process.argv[1];
+  const routerCmd  = "node --no-warnings \"" + process.argv[2] + "\"";
+  const obsidianInj = "node --no-warnings \"" + process.argv[3] + "\" inject-context";
+  const obsidianLog  = "node --no-warnings \"" + process.argv[3] + "\" session-log";
 
-# 5b. Repos communauté (clone à l'install) ----------------------------------
+  let s = {};
+  try { s = JSON.parse(fs.readFileSync(dst, "utf8")); } catch {}
+  s.hooks = s.hooks || {};
+
+  const ensure = (event, command) => {
+    s.hooks[event] = s.hooks[event] || [];
+    const already = s.hooks[event].some(g =>
+      (g.hooks || []).some(h => h.command === command));
+    if (!already) {
+      s.hooks[event].push({ matcher: "", hooks: [{ type: "command", command }] });
+    }
+  };
+
+  ensure("UserPromptSubmit", routerCmd);
+  ensure("UserPromptSubmit", obsidianInj);
+  ensure("Stop", obsidianLog);
+
+  fs.writeFileSync(dst, JSON.stringify(s, null, 2));
+' "$SETTINGS_DST" "$CLAUDE_DIR/scripts/skill-router.js" "$CLAUDE_DIR/scripts/obsidian.js"
+ok "Hooks actifs (settings.json fusionné, rien d'écrasé)"
+
+# 5. Clé Magic (optionnel, avant l'enregistrement MCP pour l'injecter) ------
+MAGIC_KEY=""
+if [ -t 0 ]; then
+  printf '\nClé API 21st.dev Magic (Entrée pour ignorer) : '
+  read -r MAGIC_KEY || true
+fi
+
+# 6. MCP servers — scope user via `claude mcp add` (le seul chemin lu) ------
+say "Activation des MCP (scope user)…"
+if [ -n "$MAGIC_KEY" ]; then
+  claude mcp add -s user magic -e "API_KEY=$MAGIC_KEY" -- npx -y @21st-dev/magic@latest 2>/dev/null || true
+else
+  claude mcp add -s user magic -- npx -y @21st-dev/magic@latest 2>/dev/null || true
+fi
+claude mcp add -s user playwright -- npx @playwright/mcp@latest 2>/dev/null || true
+claude mcp add -s user context7   -- npx -y @upstash/context7-mcp 2>/dev/null || true
+claude mcp add -s user claude-mem -- npx -y claude-mem 2>/dev/null || true
+claude mcp add -s user graphify   -- npx -y graphify-mcp 2>/dev/null || true
+ok "5 MCP actifs (scope user)"
+
+# 6b. Repos communauté (clone à l'install) -----------------------------------
 VENDOR="$DEST/vendor"
 SKILLS_VENDOR="$CLAUDE_DIR/skills/vendor"
 say "Clonage des repos communauté → $VENDOR…"
@@ -137,30 +172,21 @@ if have pip || have pip3; then
     || warn "agent-reach non installé (pip absent — non bloquant)"
 fi
 
-# 6. Utilitaires globaux ----------------------------------------------------
+# 7. Utilitaires globaux ----------------------------------------------------
 say "Outils vidéo/mémoire (hyperframes, remotion, claude-mem, graphify)…"
 npm install -g hyperframes remotion claude-mem graphify-mcp 2>/dev/null || warn "npm -g partiel (non bloquant)"
-
-# 7. Clé Magic (optionnel) --------------------------------------------------
-if [ -t 0 ]; then
-  printf '\nClé API 21st.dev Magic (Entrée pour ignorer) : '
-  read -r MAGIC_KEY || true
-  if [ -n "${MAGIC_KEY:-}" ]; then
-    printf 'MAGIC_API_KEY=%s\n' "$MAGIC_KEY" >> "$CLAUDE_DIR/.env"
-    ok "Clé Magic enregistrée"
-  fi
-fi
 
 # 8. Résumé -----------------------------------------------------------------
 cat <<'EOF'
 
 ────────────────────────────────────────────
   ✓ SuperClaude installé
-  ✓ 22 plugins   ✓ 15 skills   ✓ 5 MCP
+  ✓ 22 plugins   ✓ 15 skills   ✓ 5 MCP (scope user)
   ✓ 5 repos communauté clonés (~/.superclaude/vendor)
-  ✓ Auto-routing actif (skills invoqués tout seuls)
+  ✓ Hooks actifs — auto-routing réellement branché
 
   Lance :  claude
   Skills : claude /skills
+  MCP    : claude mcp list
 ────────────────────────────────────────────
 EOF

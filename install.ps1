@@ -60,31 +60,81 @@ foreach ($p in $packs) {
 Ok 'Plugins installes'
 
 # 4. Skills + scripts
-Say 'Copie des skills et hooks vers ~/.claude...'
+Say 'Copie des skills vers ~/.claude...'
 New-Item -ItemType Directory -Force -Path (Join-Path $ClaudeDir 'skills')  | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $ClaudeDir 'scripts') | Out-Null
 Copy-Item (Join-Path $Dest '.claude\skills\*')  (Join-Path $ClaudeDir 'skills')  -Recurse -Force -ErrorAction SilentlyContinue
 Copy-Item (Join-Path $Dest '.claude\scripts\*') (Join-Path $ClaudeDir 'scripts') -Recurse -Force -ErrorAction SilentlyContinue
 Ok '15 skills + auto-router copies'
 
-# 5. MCP servers
-Say 'Configuration des MCP...'
-$mcpSrc = Join-Path $Dest '.mcp.json'
-$mcpDst = Join-Path $ClaudeDir '.mcp.json'
-if (Test-Path $mcpDst) {
-  $a = Get-Content $mcpDst -Raw | ConvertFrom-Json
-  $b = Get-Content $mcpSrc -Raw | ConvertFrom-Json
-  if (-not $a.mcpServers) { $a | Add-Member -NotePropertyName mcpServers -NotePropertyValue (@{}) }
-  foreach ($k in $b.mcpServers.PSObject.Properties.Name) {
-    $a.mcpServers | Add-Member -NotePropertyName $k -NotePropertyValue $b.mcpServers.$k -Force
-  }
-  $a | ConvertTo-Json -Depth 12 | Set-Content $mcpDst
-} else {
-  Copy-Item $mcpSrc $mcpDst -Force
-}
-Ok '5 MCP configures'
+# 4b. Hooks - fusionner dans ~/.claude/settings.json (scope user)
+# C'est ce fichier, pas juste les scripts, qui declenche reellement le routeur.
+Say 'Activation des hooks (auto-routing) dans ~/.claude/settings.json...'
+$SettingsDst = Join-Path $ClaudeDir 'settings.json'
+$RouterPath   = Join-Path $ClaudeDir 'scripts\skill-router.js'
+$ObsidianPath = Join-Path $ClaudeDir 'scripts\obsidian.js'
 
-# 5b. Repos communaute (clone a l'install)
+$s = $null
+if (Test-Path $SettingsDst) {
+  try { $s = Get-Content $SettingsDst -Raw | ConvertFrom-Json } catch { $s = $null }
+}
+if (-not $s) { $s = New-Object PSObject }
+if (-not $s.PSObject.Properties['hooks']) {
+  $s | Add-Member -NotePropertyName hooks -NotePropertyValue (New-Object PSObject) -Force
+}
+
+function Add-HookEntry($settingsObj, $eventName, $command) {
+  if (-not $settingsObj.hooks.PSObject.Properties[$eventName]) {
+    $settingsObj.hooks | Add-Member -NotePropertyName $eventName -NotePropertyValue @() -Force
+  }
+  $existing = @($settingsObj.hooks.$eventName)
+  $already = $false
+  foreach ($group in $existing) {
+    foreach ($h in @($group.hooks)) {
+      if ($h.command -eq $command) { $already = $true }
+    }
+  }
+  if (-not $already) {
+    $newGroup = [PSCustomObject]@{
+      matcher = ''
+      hooks   = @([PSCustomObject]@{ type = 'command'; command = $command })
+    }
+    $settingsObj.hooks.$eventName = $existing + $newGroup
+  }
+}
+
+$routerCmd    = 'node --no-warnings "' + $RouterPath + '"'
+$obsidianInj  = 'node --no-warnings "' + $ObsidianPath + '" inject-context'
+$obsidianLog  = 'node --no-warnings "' + $ObsidianPath + '" session-log'
+
+Add-HookEntry $s 'UserPromptSubmit' $routerCmd
+Add-HookEntry $s 'UserPromptSubmit' $obsidianInj
+Add-HookEntry $s 'Stop' $obsidianLog
+
+$s | ConvertTo-Json -Depth 12 | Set-Content $SettingsDst
+Ok 'Hooks actifs (settings.json fusionne, rien d ecrase)'
+
+# 5. Cle Magic (optionnel, avant l'enregistrement MCP pour l'injecter)
+$MagicKey = ''
+if ([Environment]::UserInteractive -and $Host.UI.RawUI) {
+  try { $MagicKey = Read-Host 'Cle API 21st.dev Magic (Entree pour ignorer)' }
+  catch { Warn 'Prompt Magic saute (non-interactif).' }
+}
+
+# 6. MCP servers - scope user via `claude mcp add` (le seul chemin lu)
+Say 'Activation des MCP (scope user)...'
+if ($MagicKey) {
+  claude mcp add -s user magic -e "API_KEY=$MagicKey" -- npx -y '@21st-dev/magic@latest' 2>$null
+} else {
+  claude mcp add -s user magic -- npx -y '@21st-dev/magic@latest' 2>$null
+}
+claude mcp add -s user playwright -- npx '@playwright/mcp@latest' 2>$null
+claude mcp add -s user context7   -- npx -y '@upstash/context7-mcp' 2>$null
+claude mcp add -s user claude-mem -- npx -y claude-mem 2>$null
+claude mcp add -s user graphify   -- npx -y graphify-mcp 2>$null
+Ok '5 MCP actifs (scope user)'
+
+# 6b. Repos communaute (clone a l'install)
 $Vendor       = Join-Path $Dest 'vendor'
 $SkillsVendor = Join-Path $ClaudeDir 'skills\vendor'
 Say "Clonage des repos communaute -> $Vendor..."
@@ -133,26 +183,19 @@ if ((Have 'pip') -or (Have 'pip3') -or (Have 'pipx')) {
   Ok 'agent-reach installe (si pip present)'
 }
 
-# 6. Utilitaires globaux
+# 7. Utilitaires globaux
 Say 'Outils video/memoire (hyperframes, remotion, claude-mem, graphify)...'
 npm install -g hyperframes remotion claude-mem graphify-mcp 2>$null
-
-# 7. Cle Magic (optionnel) - saute si non-interactif (evite le hang sous iex)
-if ([Environment]::UserInteractive -and $Host.UI.RawUI) {
-  try {
-    $magic = Read-Host 'Cle API 21st.dev Magic (Entree pour ignorer)'
-    if ($magic) { Add-Content (Join-Path $ClaudeDir '.env') "MAGIC_API_KEY=$magic"; Ok 'Cle Magic enregistree' }
-  } catch { Warn 'Prompt Magic saute (non-interactif). Ajoute MAGIC_API_KEY dans ~/.claude/.env plus tard.' }
-}
 
 # 8. Resume
 Write-Host ''
 Write-Host '--------------------------------------------' -ForegroundColor Magenta
 Write-Host '  SuperClaude installe' -ForegroundColor Green
-Write-Host '  22 plugins   15 skills   5 MCP'
+Write-Host '  22 plugins   15 skills   5 MCP (scope user)'
 Write-Host '  5 repos communaute clones (~/.superclaude/vendor)'
-Write-Host '  Auto-routing actif (skills invoques tout seuls)'
+Write-Host '  Hooks actifs - auto-routing reellement branche'
 Write-Host ''
 Write-Host '  Lance :  claude'
 Write-Host '  Skills : claude /skills'
+Write-Host '  MCP    : claude mcp list'
 Write-Host '--------------------------------------------' -ForegroundColor Magenta
