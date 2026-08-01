@@ -11,7 +11,7 @@ process.stdin.on('end', () => {
   let input = {}
   try { input = JSON.parse(Buffer.concat(chunks)) } catch {}
 
-  const msg = (input.message || '').toLowerCase()
+  const msg = (input.prompt || input.message || '').toLowerCase()
   const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd()
 
   // Load project learnings if available
