@@ -1,37 +1,40 @@
 # SuperClaude Lite
 
-## Noyau — actif en permanence
-`caveman` (réponses compressées) · `superpowers` (brainstorm, plans, debug, TDD) · `Skill(context-engineering)` (déléguer la lecture lourde aux sous-agents) · MCP `claude-mem` + `graphify` (mémoire cross-session).
+## Constant
+`superpowers` (brainstorm, plans, debug, TDD, git) · `caveman` (réponses compressées) · `Skill(context-engineering)` (déléguer la lecture lourde aux sous-agents) · `claude-mem` (mémoire cross-session, 5 hooks automatiques) · `code-review`.
 
-Rien d'autre n'est chargé par défaut.
+Rien d'autre n'est chargé d'avance.
 
-## À la demande — jamais par réflexe
-Le hook `UserPromptSubmit` analyse chaque message et n'affiche que des skills **réellement installés**. S'il affiche `⚡ REQUIS` / `⚡ PERTINENT`, invoquer immédiatement. S'il n'affiche rien, ne rien charger de plus que le noyau.
+## Auto — zéro coût avant usage
+Les skills s'invoquent seuls via leur description. Les outils MCP sont **différés** (ToolSearch) : seuls leurs noms chargent, les schémas arrivent au moment de l'appel.
 
-| Intention | Skills | MCP |
-|---|---|---|
-| design, UI, écran, composant | `product-design` + `ui-ux-pro-max` + `impeccable` + `taste-skill` | `magic` |
-| animation, motion, easing | `emil-design-eng` + `review-animations` | — |
-| revue, refactor, audit | `code-review` | — |
-| tests, TDD, coverage | `tdd-workflow` | `playwright` |
-| bug, crash, erreur | `systematic-debugging` | — |
-| sécurité, auth, secrets | `security` | — |
-| plan, architecture | `writing-plans` + `executing-plans` | — |
-| avant push / livraison | `verification-before-completion` + `agentic-practice` | — |
-| doc d'une lib précise | — | `context7` |
+| Quand | Ce qui s'active |
+|---|---|
+| UI, écran, composant, landing | `impeccable` + `taste-skill` |
+| animation, motion, easing | `emil-design-eng` + `review-animations` + `animation-vocabulary` |
+| recherche, comparatif, tendance | `web-research` + CLI `agent-reach` |
+| landing, CRO, funnel, SEO, copy | `marketing-growth` |
+| tâche large, multi-fichiers, audit | `context-engineering` |
+| doc d'une lib précise | MCP `context7` |
+| navigateur, E2E, screenshot | MCP `playwright` |
+| issues, PR, CI | MCP `github` |
+| deploy, env vars, logs | MCP `vercel` |
+| DB, auth, edge functions | MCP `supabase` |
+| paiements, webhooks | MCP `stripe` |
 
-**Combiner, pas prioriser** — chaque skill a un rôle distinct. `product-design` décide, `ui-ux-pro-max` fournit les références (192 palettes, 74 pairings typo, 119 règles UX, 25 types de charts), `taste-skill` arbitre, `impeccable` exécute.
+`impeccable` exécute, `taste-skill` arbitre le visuel — les deux ensemble, jamais l'un sans l'autre sur une tâche UI.
 
-MCP lourds éteints par défaut pour économiser le contexte : `sc-mcp magic on` (idem `playwright`, `context7`), `sc-mcp list` pour l'état.
+## Bascules
+`sc status` · `sc mcp <nom> on|off` · `sc plugin vercel on` (ajoute ses 34 skills : ~3800 tokens permanents — à n'allumer que le temps d'un projet Vercel).
 
-## Économie de tokens
-Recherche/exploration/mapping → sous-agent, garder la conclusion pas les extraits. Ne pas relire un fichier déjà édité. Ne pas relancer une recherche déjà déléguée.
+## Économie
+Lecture lourde, exploration, mapping → sous-agent : garder la conclusion, pas les extraits. Ne pas relire un fichier déjà édité. Ne pas relancer une recherche déjà déléguée.
 
 ## Output
 Réponses courtes. Zéro prose de remplissage. Pas de résumé sauf demandé. Commentaire de code seulement pour un WHY non évident.
 
-## Design — interdictions absolues
-Pas de `transition-all`, pas de `background-clip:text`, pas de font Inter, pas de glassmorphism. Easing : `cubic-bezier(0.16,1,0.3,1)`. Press : `scale(0.97)`.
+## Design — interdictions
+Pas de `transition-all`, `background-clip:text`, font Inter, glassmorphism. Easing `cubic-bezier(0.16,1,0.3,1)`. Press `scale(0.97)`.
 
 ## Commits
 `feat|fix|refactor: description` — pas de `Co-Authored-By`.

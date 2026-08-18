@@ -1,6 +1,6 @@
 # SuperClaude Lite
 
-Version allégée du setup. Même puissance sur les tâches qui comptent, ~10× moins de contexte permanent.
+Le même setup, réduit à ce que tu utilises vraiment. ~4× moins de contexte permanent, et tout s'invoque tout seul.
 
 ```bash
 # Mac / Linux
@@ -10,96 +10,96 @@ curl -fsSL https://raw.githubusercontent.com/Makooff/SuperClaude/main/lite/insta
 iwr -useb https://raw.githubusercontent.com/Makooff/SuperClaude/main/lite/install-lite.ps1 | iex
 ```
 
-Déjà le setup complet installé ? Ajoute `--replace-full` (bash) ou `-ReplaceFull` (PowerShell) : les 19 plugins, les 10 packs et les hooks Obsidian sont retirés, les fichiers déplacés dans `~/.claude/skills.bak-<date>`.
+Déjà le setup complet ? Ajoute `--replace-full` (bash) ou `-ReplaceFull` (PowerShell) : les 12 plugins superflus, `graphify`, `magic` et les hooks Obsidian sont retirés, les fichiers déplacés dans `~/.claude/skills.bak-<date>`.
 
-## Ce qui est installé
+## Comment ça s'invoque tout seul
 
-### Noyau — chargé en permanence
+Rien n'est routé à la main. Trois mécanismes natifs font le travail :
 
-| Composant | ⭐ | Rôle |
+| Couche | Mécanisme | Coût avant usage |
 |---|---|---|
-| `superpowers` | 273k | brainstorm, plans, debug systématique, TDD, revue par sous-agents |
-| `caveman` | — | compresse les réponses |
-| `claude-mem` (MCP) | 91k | mémoire persistante cross-session |
-| `graphify` (MCP) | — | knowledge graph |
-| `context-engineering` | — | déléguer la lecture lourde aux sous-agents |
+| Skills | leur champ `description` déclenche l'invocation | nom + description |
+| MCP | `ToolSearch` — les schémas sont **différés** par défaut | noms seulement |
+| claude-mem | 5 hooks lifecycle | ~0 |
 
-### À la demande — le router les propose selon l'intention
+Le hook `skill-router-lite.js` ne fait qu'une chose en plus : forcer les **combinaisons** (`impeccable` + `taste-skill` ensemble sur une tâche UI). Il ne cite jamais un skill absent du disque, et reste silencieux quand rien ne matche.
 
-| Catégorie | Skills | MCP |
-|---|---|---|
-| **design** | `product-design` (+5 refs) · `ui-ux-pro-max` (118k ⭐) · `impeccable` · `taste-skill` · `emil-design-eng` · `review-animations` | `magic` |
-| **dev** | `code-review` · `tdd-workflow` · `agentic-practice` + les 14 skills superpowers | `playwright`, `context7` |
-| **sécurité** | `security` | — |
+## Constant
 
-`ui-ux-pro-max` embarque 3,6 Mo de données locales — 79 styles, 192 palettes, 74 pairings typographiques, 119 règles UX, 25 types de graphiques, 22 stacks — lues à la demande par le skill. Coût en contexte : une description, ~150 tokens. Seul ce dossier est installé, pas les 6 autres skills du repo qui doublonnent avec `product-design`.
-
-### Jamais installé
-
-19 plugins (dont `github` ≈ 60 outils MCP, `vercel`, `supabase`, `stripe`), les 10 packs `wshobson/agents`, les 4 repos communauté copiés à une profondeur où Claude ne les charge pas, les paquets npm globaux, `pip install agent-reach`, les hooks Obsidian, `self-learn.js`.
-
-## Coût en contexte
-
-| | Complet | Lite |
-|---|---|---|
-| MCP (schémas d'outils) | ~23k | ~2,7k |
-| Plugins et packs | ~4,5k | ~0,7k |
-| Skills | ~1,5k | ~1k |
-| **Total permanent** | **~30k** | **~4,5k** |
-
-Le poste dominant, ce sont les schémas d'outils MCP, pas les skills. D'où le choix : deux MCP mémoire allumés en permanence, les trois lourds éteints.
-
-## MCP à la demande
-
-```bash
-sc-mcp magic on        # composants 21st.dev
-sc-mcp playwright on   # browser, E2E, screenshots
-sc-mcp context7 on     # docs live d'une lib
-sc-mcp all off
-sc-mcp list
-```
-
-Un MCP enregistré charge ses schémas dans **chaque** session. On l'allume pour la durée où on en a besoin, pas plus.
-
-## Le router
-
-`~/.claude/scripts/skill-router-lite.js`, branché sur `UserPromptSubmit`.
-
-- Il scanne le disque et **ne propose que des skills réellement présents**. Le router de la version complète pointait vers `Skill(verify)`, `Skill(impeccable)`, `Skill(taste-skill)` — aucun n'existait.
-- Silencieux quand rien ne correspond : zéro token sur une conversation ordinaire.
-- Trois lignes maximum, trois skills par ligne.
-- Si un MCP manque pour la catégorie détectée, il affiche la commande pour l'allumer.
-
-```bash
-echo '{"prompt":"refais le hero"}' | node ~/.claude/scripts/skill-router-lite.js
-```
-
-## Options
-
-| Flag bash | Flag PowerShell | Effet |
-|---|---|---|
-| `--no-design` | `-NoDesign` | retire les 6 skills design + ui-ux-pro-max |
-| `--no-dev` | `-NoDev` | retire `code-review`, `tdd-workflow`, `agentic-practice` |
-| `--no-security` | `-NoSecurity` | retire `security` |
-| `--with-magic` | `-WithMagic` | enregistre le MCP dès l'install |
-| `--with-playwright` | `-WithPlaywright` | idem |
-| `--with-context7` | `-WithContext7` | idem |
-| `--replace-full` | `-ReplaceFull` | désinstalle le setup complet |
-
-## Ce que l'installeur écrit
-
-| Chemin | Traitement |
+| Composant | Rôle |
 |---|---|
-| `~/.claude/skills/<skill>/` | un dossier par skill de la whitelist, rien d'autre |
-| `~/.claude/scripts/` | `skill-router-lite.js`, `sc-mcp` |
-| `~/.claude/settings.json` | fusionné — les hooks existants sont conservés, ceux d'Obsidian retirés |
-| `~/.claude/CLAUDE.md` | bloc entre `<!-- superclaude-lite:start -->` et `:end` — le reste du fichier est intact |
-| `~/.superclaude/vendor/ui-ux-pro-max` | clone sparse, 4,7 Mo au lieu de 23 |
+| `superpowers` | brainstorming, writing-plans, executing-plans, systematic-debugging, TDD, git worktrees — 14 skills |
+| `caveman` | réponses compressées (output style — lance `/caveman` une fois) |
+| `code-review` | `/code-review` sur un diff ou une PR |
+| `claude-mem` | mémoire cross-session, capture et réinjecte automatiquement |
+| `Skill(context-engineering)` | délègue la lecture lourde aux sous-agents |
+
+## Auto — zéro coût avant usage
+
+**Skills** — `impeccable` · `taste-skill` · `emil-design-eng` · `review-animations` · `animation-vocabulary` · `marketing-growth` · `web-research`
+
+**MCP différés** — `github` · `vercel` · `supabase` · `stripe` · `playwright` · `context7`
+
+**CLI** — `agent-reach` (Reddit, YouTube, X, GitHub, HN, web — zéro clé API) alimente `web-research`
+
+## Le seul arbitrage
+
+`vercel`, `stripe` et `supabase` sont ajoutés en **MCP seul**. Leurs plugins chargeraient 44 descriptions de skills à chaque session :
+
+| Plugin | Contenu | Coût permanent |
+|---|---|---|
+| `vercel` | 34 skills + 23 commandes/agents | **~3 800 tok** |
+| `supabase` | 2 skills | ~400 tok |
+| `stripe` | 8 skills + 2 commandes | ~100 tok |
+
+Tu les récupères le jour où tu bosses vraiment dessus :
+
+```bash
+sc plugin vercel on     # puis  sc plugin vercel off  quand le projet est fini
+```
+
+## Bascules
+
+```bash
+sc status                  # MCP, plugins et skills actifs
+sc mcp playwright on       # ou off
+sc mcp magic on            # 21st.dev, demande la clé API
+sc plugin vercel on        # ajoute les 34 skills Vercel
+```
+
+Ajoute `~/.claude/scripts` à ton PATH pour que `sc` soit disponible partout.
+
+## Options d'installation
+
+| Flag | Effet |
+|---|---|
+| `--with-vercel-skills` | installe le plugin vercel complet dès le départ |
+| `--with-stripe-skills` / `--with-supabase-skills` | idem |
+| `--with-security` | ajoute le skill `security` (auth, secrets, OWASP) |
+| `--with-tdd` | ajoute le skill `tdd-workflow` |
+| `--no-mcp` | aucun MCP |
+| `--no-agent-reach` | pas de CLI de recherche web |
+| `--replace-full` | désinstalle l'ancien setup complet |
+
+## Ce qui n'est pas installé
+
+Les 10 packs `wshobson/agents` · `graphify` · `magic` · `product-design` · `nova-agency` · `prose-clean` · `video-generation` · `agentic-practice` · `claude-md-management` · `skill-creator` · les hooks Obsidian · les 4 repos vendor (`marketingskills`, `stop-slop`, `Agent-Skills-for-Context-Engineering`, `claude-code-best-practice`) · les npm globaux (`hyperframes`, `remotion`).
 
 ## Corrections par rapport au setup complet
 
-- `impeccable`, `taste-skill`, `tdd-workflow`, `security` étaient des `.md` plats sans front-matter : jamais chargés comme skills. Convertis en `dossier/SKILL.md`.
-- Le router appelait `Skill(verify)` ; le nom réel dans superpowers est `verification-before-completion`.
-- `caveman` et `claude-mem` ne sont pas dans le marketplace officiel — sans le suffixe `@caveman` / `@thedotmack`, l'installation échouait en silence.
-- `self-learn.js` était copié mais jamais branché, et le router lisait un `learnings.md` que rien n'écrivait.
-- `CLAUDE.md` n'était jamais installé globalement : la règle « invoque les skills du hook » n'existait que dans les projets créés par `new-project.sh`.
+| Problème | Correction |
+|---|---|
+| `impeccable`, `taste-skill`, `tdd-workflow`, `security` étaient des `.md` plats sans front-matter — jamais chargés | réécrits en `<nom>/SKILL.md` avec `name` + `description` |
+| Le router citait `Skill(verify)`, qui n'existe pas (le vrai nom est `verification-before-completion`) | le router valide chaque nom sur le disque avant de le citer |
+| `self-learn.js` copié mais jamais branché dans `settings.json` | supprimé |
+| `CLAUDE.md` jamais installé globalement — les règles ne s'appliquaient que dans les projets bootstrappés | écrit dans `~/.claude/CLAUDE.md`, entre marqueurs, sans toucher au reste |
+| `claude-mem` ajouté en MCP seul — les 5 hooks n'étaient pas enregistrés | `npx claude-mem install`, la méthode officielle |
+| `obsidian.js` posait `NODE_TLS_REJECT_UNAUTHORIZED=0` sur tout le process | hook retiré |
+| `caveman` déclaré always-on alors que c'est un output style | documenté : `/caveman` une fois |
+
+## Tester le router
+
+```bash
+echo '{"prompt":"refais le hero avec une transition douce"}' \
+  | node ~/.claude/scripts/skill-router-lite.js
+```
