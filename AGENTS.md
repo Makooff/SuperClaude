@@ -1,44 +1,66 @@
-# AGENTS.md — Instructions pour Claude / agents
+# AGENTS.md — instructions pour Claude et autres agents
 
-Si l'utilisateur te donne ce repo avec une intention du type **« installe et active ce setup »**, exécute la procédure ci-dessous **sans poser de question** (sauf la clé Magic, optionnelle).
+Si l'utilisateur donne ce repo avec une intention du type « installe et active ce setup », ou « installe SuperClaude Lite », exécute la procédure ci-dessous **sans poser de question**.
 
-## Installation + activation (à exécuter)
+## Procédure par défaut — SuperClaude Lite
 
-1. **Lancer l'installeur** (détecte l'OS, installe Claude Code si absent, plugins, skills, MCP, clone les repos communauté) :
+C'est la version à installer sauf demande explicite du contraire.
 
-   **macOS / Linux**
-   ```bash
-   curl -fsSL https://raw.githubusercontent.com/Makooff/SuperClaude/main/install.sh | bash
-   ```
+**macOS / Linux**
+```bash
+curl -fsSL https://raw.githubusercontent.com/Makooff/SuperClaude/main/lite/install-lite.sh | bash
+```
 
-   **Windows (PowerShell)**
-   ```powershell
-   iwr -useb https://raw.githubusercontent.com/Makooff/SuperClaude/main/install.ps1 | iex
-   ```
+**Windows (PowerShell)**
+```powershell
+iwr -useb https://raw.githubusercontent.com/Makooff/SuperClaude/main/lite/install-lite.ps1 | iex
+```
 
-   Si tu es déjà dans un clone local du repo, exécute directement `bash install.sh` (ou `.\install.ps1`).
+Depuis un clone local : `bash lite/install-lite.sh` (ou `.\lite\install-lite.ps1`).
 
-2. **Vérifier l'activation** :
-   ```bash
-   claude plugin list           # 22 plugins
-   claude mcp list              # 5 MCP : magic, playwright, context7, claude-mem, graphify
-   ls ~/.claude/skills          # 15 skills + dossier vendor/
-   ```
+Si la machine porte déjà l'ancien setup complet, ajoute `--replace-full` (bash) ou `-ReplaceFull` (PowerShell) : les plugins superflus, `graphify`, `magic` et les hooks Obsidian sont retirés, et les fichiers écartés sont déplacés dans `~/.claude/skills.bak-<date>`.
 
-3. **Confirmer à l'utilisateur** ce qui est actif : nombre de plugins, MCP, skills, repos communauté clonés, et que l'auto-routing (`~/.claude/scripts/skill-router.js`) est en place.
+## Vérifier
+
+```bash
+claude plugin list     # superpowers, caveman, code-review, claude-mem
+claude mcp list        # github, vercel, supabase, stripe, playwright, context7
+ls ~/.claude/skills    # 8 skills
+```
+
+Puis confirme à l'utilisateur : plugins actifs, MCP enregistrés, skills installés, et que le hook `~/.claude/scripts/skill-router-lite.js` est branché dans `~/.claude/settings.json`.
+
+Deux points à lui signaler à la fin :
+
+- `caveman` est un output style : il doit lancer `/caveman` une fois pour l'activer.
+- `vercel`, `stripe` et `github` demandent une autorisation OAuth au premier usage, via `/mcp`.
 
 ## Ce que « activer » signifie
 
-- **Skills always-on** : le hook `UserPromptSubmit` (`skill-router.js`) lit chaque message et invoque le bon skill selon l'intention — sans mot-clé. Voir `docs/AUTO-ROUTING.md`.
-- **MCP auto-actifs** : `magic`, `playwright`, `context7`, `claude-mem`, `graphify` déclarés dans `.mcp.json`.
-- **Combiner, pas prioriser** : chaque skill a un rôle distinct, aucun doublon.
+Rien n'est routé à la main. Trois mécanismes natifs font le travail :
+
+- **Skills** — chacun s'invoque via son champ `description`.
+- **MCP** — les schémas d'outils sont différés par `ToolSearch` (activé par défaut) : seuls les noms chargent au démarrage, les schémas arrivent au moment de l'appel.
+- **claude-mem** — 5 hooks lifecycle capturent et réinjectent le contexte automatiquement.
+
+Le hook `skill-router-lite.js` ne fait qu'une chose en plus : forcer les combinaisons que le déclenchement natif ne produit pas seul, par exemple `impeccable` + `taste-skill` ensemble sur une tâche UI. Il valide chaque nom sur le disque et reste silencieux quand rien ne correspond.
+
+Détail complet des composants, des options d'installation et des bascules : [`lite/README.md`](lite/README.md).
+
+## Setup complet — seulement sur demande explicite
+
+Le setup d'origine installe 22 plugins, 5 MCP, 4 repos communauté et des paquets npm globaux. Il coûte nettement plus de contexte permanent. Ne l'installe que si l'utilisateur le nomme explicitement.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Makooff/SuperClaude/main/install.sh | bash
+```
 
 ## Règle de comportement post-install
 
-Après activation, pour **chaque** demande de l'utilisateur : identifier la catégorie (voir table dans `CLAUDE.md`) et invoquer le(s) skill(s) approprié(s) avant de répondre. Réponses courtes, zéro slop, français par défaut.
+Pour chaque demande, identifier l'intention et invoquer le ou les skills concernés avant de répondre. Réponses courtes, français par défaut.
 
 ## Ne pas faire
 
-- Ne pas committer/pusher sans demande explicite.
+- Ne pas committer ni pusher sans demande explicite.
 - Ne pas modifier `installer-app/` (legacy).
 - Ne pas dupliquer un skill existant — router vers celui en place.
