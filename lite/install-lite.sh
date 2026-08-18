@@ -162,10 +162,10 @@ ok "~/.claude/CLAUDE.md — bloc superclaude-lite (reste du fichier intact)"
 # 9. MCP — tous différés par ToolSearch, coût ~0 avant usage -----------------
 if [ "$WITH_MCP" = "1" ]; then
   say "MCP (différés)…"
-  claude mcp add --transport http github   https://api.githubcopilot.com/mcp/ >/dev/null 2>&1 || true
-  claude mcp add --transport http vercel   https://mcp.vercel.com             >/dev/null 2>&1 || true
-  claude mcp add --transport http stripe   https://mcp.stripe.com             >/dev/null 2>&1 || true
-  claude mcp add --transport http context7 https://mcp.context7.com/mcp       >/dev/null 2>&1 || true
+  claude mcp add -s user --transport http github   https://api.githubcopilot.com/mcp/ >/dev/null 2>&1 || true
+  claude mcp add -s user --transport http vercel   https://mcp.vercel.com             >/dev/null 2>&1 || true
+  claude mcp add -s user --transport http stripe   https://mcp.stripe.com             >/dev/null 2>&1 || true
+  claude mcp add -s user --transport http context7 https://mcp.context7.com/mcp       >/dev/null 2>&1 || true
   claude mcp add -s user supabase   -- npx -y @supabase/mcp-server-supabase@latest >/dev/null 2>&1 || true
   claude mcp add -s user playwright -- npx @playwright/mcp@latest                  >/dev/null 2>&1 || true
   ok "github · vercel · supabase · stripe · context7 · playwright"

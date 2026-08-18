@@ -135,10 +135,10 @@ Ok 'CLAUDE.md - bloc superclaude-lite (reste du fichier intact)'
 # 9. MCP - tous differes par ToolSearch
 if (-not $NoMcp) {
   Say 'MCP (differes)...'
-  claude mcp add --transport http github   'https://api.githubcopilot.com/mcp/' 2>$null
-  claude mcp add --transport http vercel   'https://mcp.vercel.com'             2>$null
-  claude mcp add --transport http stripe   'https://mcp.stripe.com'             2>$null
-  claude mcp add --transport http context7 'https://mcp.context7.com/mcp'       2>$null
+  claude mcp add -s user --transport http github   'https://api.githubcopilot.com/mcp/' 2>$null
+  claude mcp add -s user --transport http vercel   'https://mcp.vercel.com'             2>$null
+  claude mcp add -s user --transport http stripe   'https://mcp.stripe.com'             2>$null
+  claude mcp add -s user --transport http context7 'https://mcp.context7.com/mcp'       2>$null
   claude mcp add -s user supabase   -- npx -y '@supabase/mcp-server-supabase@latest' 2>$null
   claude mcp add -s user playwright -- npx '@playwright/mcp@latest'                  2>$null
   Ok 'github . vercel . supabase . stripe . context7 . playwright'
