@@ -21,7 +21,7 @@ const CATALOG = [
     skills: ['systematic-debugging'], reason: 'debug' },
 
   { key: 'design',    re: /design|ui\b|ux\b|maquette|wireframe|landing|hero\b|layout|composant|component|onboarding|dashboard|typograph|palette|responsive|interface|[ée]cran/,
-    skills: ['product-design', 'impeccable', 'taste-skill'], mcp: 'magic', reason: 'design/UI' },
+    skills: ['product-design', 'ui-ux-pro-max', 'impeccable', 'taste-skill'], mcp: 'magic', reason: 'design/UI' },
 
   { key: 'animation', re: /animation|motion|transition|easing|micro-?interaction|framer|spring|hover|feel(s)? (weird|off|good)/,
     skills: ['emil-design-eng', 'review-animations'], reason: 'motion' },
@@ -107,7 +107,7 @@ process.stdin.on('end', () => {
   const lines = []
 
   for (const c of matched) {
-    const have = c.skills.filter(n => skills.has(n))
+    const have = c.skills.filter(n => skills.has(n)).slice(0, 3)
     const mcpOn = c.mcp && mcps.has(c.mcp)
     const mcpOff = c.mcp && !mcpOn
     if (!have.length && !mcpOn && !mcpOff) continue

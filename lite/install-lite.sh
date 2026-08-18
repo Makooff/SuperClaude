@@ -6,6 +6,7 @@
 #   3 plugins  : superpowers, caveman, code-review
 #   2 MCP      : claude-mem, graphify           (mémoire — coût faible)
 #   9 skills   : noyau + design + dev + sécurité
+#   1 externe  : ui-ux-pro-max (118k ⭐) — 3,6 Mo de data locale, ~150 tok en contexte
 #   1 hook     : skill-router-lite (silencieux quand rien ne matche)
 #
 # JAMAIS installé : les 19 autres plugins, les 10 packs wshobson (191 agents),
@@ -111,6 +112,32 @@ for s in "${SKILLS[@]}"; do
 done
 ok "${#SKILLS[@]} skills → ~/.claude/skills"
 
+# 5b. ui-ux-pro-max — design intelligence externe (118k ⭐) --------------------
+# On ne prend QUE le dossier du skill : les 6 autres skills du repo (banner,
+# slides, brand…) doublonnent avec product-design et coûteraient ~500 tok de plus.
+if [ "$WITH_DESIGN" = "1" ]; then
+  say "ui-ux-pro-max (192 palettes, 74 pairings typo, 119 règles UX)…"
+  UIUX_SRC="$DEST/vendor/ui-ux-pro-max"
+  UIUX_SUB=".claude/skills/ui-ux-pro-max"
+  if [ -d "$UIUX_SRC/.git" ]; then
+    git -C "$UIUX_SRC" pull --ff-only >/dev/null 2>&1 || true
+  else
+    mkdir -p "$(dirname "$UIUX_SRC")"
+    if git clone --depth 1 --filter=blob:none --sparse \
+         https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git "$UIUX_SRC" >/dev/null 2>&1; then
+      git -C "$UIUX_SRC" sparse-checkout set "$UIUX_SUB" >/dev/null 2>&1 || true
+    else
+      git clone --depth 1 https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git \
+        "$UIUX_SRC" >/dev/null 2>&1 || warn "clone ui-ux-pro-max échoué (non bloquant)"
+    fi
+  fi
+  if [ -d "$UIUX_SRC/$UIUX_SUB" ]; then
+    rm -rf "$CLAUDE_DIR/skills/ui-ux-pro-max"
+    cp -R "$UIUX_SRC/$UIUX_SUB" "$CLAUDE_DIR/skills/ui-ux-pro-max"
+    ok "ui-ux-pro-max installé ($(du -sh "$CLAUDE_DIR/skills/ui-ux-pro-max" 2>/dev/null | cut -f1) sur disque, ~150 tok en contexte)"
+  fi
+fi
+
 # 6. Router (1 seul hook) -----------------------------------------------------
 cp "$SRC/lite/scripts/skill-router-lite.js" "$CLAUDE_DIR/scripts/"
 cp "$SRC/lite/scripts/sc-mcp" "$CLAUDE_DIR/scripts/" && chmod +x "$CLAUDE_DIR/scripts/sc-mcp"
@@ -175,9 +202,10 @@ cat <<EOF
 ────────────────────────────────────────────
   ✓ SuperClaude Lite installé
 
-  Noyau (permanent) : superpowers · caveman · context-engineering
-                      MCP claude-mem + graphify
-  À la demande      : ${#SKILLS[@]} skills, activés par le router selon l'intention
+  Noyau (permanent) : superpowers (273k ⭐) · caveman · context-engineering
+                      MCP claude-mem (91k ⭐) + graphify
+  À la demande      : ${#SKILLS[@]} skills locaux + ui-ux-pro-max (118k ⭐),
+                      activés par le router selon l'intention
   MCP lourds        : éteints — \`sc-mcp magic on\` / \`playwright\` / \`context7\`
 
   Non installé      : 19 plugins, 191 agents wshobson, 5 repos vendor,

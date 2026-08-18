@@ -10,7 +10,7 @@ Le hook `UserPromptSubmit` analyse chaque message et n'affiche que des skills **
 
 | Intention | Skills | MCP |
 |---|---|---|
-| design, UI, écran, composant | `product-design` + `impeccable` + `taste-skill` | `magic` |
+| design, UI, écran, composant | `product-design` + `ui-ux-pro-max` + `impeccable` + `taste-skill` | `magic` |
 | animation, motion, easing | `emil-design-eng` + `review-animations` | — |
 | revue, refactor, audit | `code-review` | — |
 | tests, TDD, coverage | `tdd-workflow` | `playwright` |
@@ -20,7 +20,7 @@ Le hook `UserPromptSubmit` analyse chaque message et n'affiche que des skills **
 | avant push / livraison | `verification-before-completion` + `agentic-practice` | — |
 | doc d'une lib précise | — | `context7` |
 
-**Combiner, pas prioriser** — chaque skill a un rôle distinct. `product-design` décide, `impeccable` exécute, `taste-skill` arbitre le visuel.
+**Combiner, pas prioriser** — chaque skill a un rôle distinct. `product-design` décide, `ui-ux-pro-max` fournit les références (192 palettes, 74 pairings typo, 119 règles UX, 25 types de charts), `taste-skill` arbitre, `impeccable` exécute.
 
 MCP lourds éteints par défaut pour économiser le contexte : `sc-mcp magic on` (idem `playwright`, `context7`), `sc-mcp list` pour l'état.
 
