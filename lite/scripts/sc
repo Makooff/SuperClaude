@@ -15,10 +15,10 @@ usage() { sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 1; }
 
 mcp_on() {
   case "$1" in
-    github)     claude mcp add --transport http github     https://api.githubcopilot.com/mcp/ ;;
-    vercel)     claude mcp add --transport http vercel     https://mcp.vercel.com ;;
-    stripe)     claude mcp add --transport http stripe     https://mcp.stripe.com ;;
-    context7)   claude mcp add --transport http context7   https://mcp.context7.com/mcp ;;
+    github)     claude mcp add -s user --transport http github     https://api.githubcopilot.com/mcp/ ;;
+    vercel)     claude mcp add -s user --transport http vercel     https://mcp.vercel.com ;;
+    stripe)     claude mcp add -s user --transport http stripe     https://mcp.stripe.com ;;
+    context7)   claude mcp add -s user --transport http context7   https://mcp.context7.com/mcp ;;
     supabase)   claude mcp add -s user supabase   -- npx -y @supabase/mcp-server-supabase@latest ;;
     playwright) claude mcp add -s user playwright -- npx @playwright/mcp@latest ;;
     magic)
