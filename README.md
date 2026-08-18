@@ -17,9 +17,27 @@
 
 ---
 
-> **Tu es Claude/un agent ?** Lis [`AGENTS.md`](AGENTS.md) et exécute la procédure « installe et active ce setup ».
+> **Tu es Claude/un agent ?** Lis [`AGENTS.md`](AGENTS.md) et exécute la procédure « installe et active ce setup ». Elle installe la version **Lite** par défaut.
 
-## Install en une ligne
+## Install en une ligne — Lite (recommandé)
+
+**macOS / Linux**
+```bash
+curl -fsSL https://raw.githubusercontent.com/Makooff/SuperClaude/main/lite/install-lite.sh | bash
+```
+
+**Windows (PowerShell)**
+```powershell
+iwr -useb https://raw.githubusercontent.com/Makooff/SuperClaude/main/lite/install-lite.ps1 | iex
+```
+
+3 plugins, 8 skills, 6 MCP différés, 1 hook. Environ 4x moins de contexte permanent que le setup complet, pour la même puissance sur les tâches qui comptent. Détail dans [`lite/README.md`](lite/README.md).
+
+Ajoute `--replace-full` (bash) ou `-ReplaceFull` (PowerShell) si la machine porte déjà le setup complet.
+
+## Install en une ligne — complet
+
+22 plugins, 5 MCP, 4 repos communauté, paquets npm globaux.
 
 **macOS / Linux**
 ```bash
