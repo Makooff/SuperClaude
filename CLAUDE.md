@@ -1,75 +1,110 @@
 # SuperClaude
 
-## Toujours actifs (chaque message, sans condition)
+Un seul fichier. Copié à la racine d'un projet, Claude Code le lit tout seul à chaque démarrage — c'est lui qui porte tout le setup.
 
-| Outil | Rôle |
+## Démarrage — vérification silencieuse
+
+Avant de répondre à un premier message de session, vérifier que ces 4 briques répondent :
+
+```bash
+claude plugin list 2>/dev/null | grep -qi superpowers          && echo ok-superpowers
+claude plugin list 2>/dev/null | grep -qi claude-mem            && echo ok-claude-mem
+claude plugin list 2>/dev/null | grep -qi context-engineering   && echo ok-context-engineering
+[ -f ~/.claude/skills/stop-slop/SKILL.md ]                      && echo ok-stop-slop
+```
+
+- Les 4 répondent → ne rien dire, continuer normalement.
+- Il en manque → une seule ligne, rien d'autre :
+  `il manque <liste des manquants> — dis "installe et active ce setup"`
+
+## Installation
+
+### Machine — une seule fois (persiste ensuite dans `~/.claude/` pour tous les projets)
+
+**Plugins** — CLI `claude plugin`, jamais les commandes slash :
+
+```bash
+claude plugin install superpowers
+
+claude plugin marketplace add thedotmack/claude-mem
+claude plugin install claude-mem@thedotmack
+npx claude-mem install    # enregistre les 5 hooks lifecycle — le plugin seul ne le fait pas
+
+claude plugin marketplace add muratcankoylan/Agent-Skills-for-Context-Engineering
+claude plugin install context-engineering@context-engineering-marketplace
+
+claude plugin marketplace add Hainrixz/claude-ads
+claude plugin install claude-ads@tododeia-claude-ads
+```
+
+> `claude-ads` : celui de `Hainrixz` couvre Meta/Google/TikTok (95% du budget pub, plugin mature). Si Nova a besoin de LinkedIn/Snapchat/Pinterest/etc., remplacer par `AgriciDaniel/claude-ads` (12 plateformes) — une ligne à changer ci-dessus.
+
+**Skills** — CLI `npx skills add` ([vercel-labs/skills](https://github.com/vercel-labs/skills)), scope machine avec `-g` :
+
+```bash
+npx skills add leonxlnx/taste-skill --skill taste-skill -g -a claude-code -y
+npx skills add coreyhaines31/marketingskills --skill '*' -g -a claude-code -y
+```
+
+**stop-slop** — pas de marketplace, clone direct à la racine des skills (sinon Claude Code ne le voit pas) :
+
+```bash
+git clone --depth 1 https://github.com/hardikpandya/stop-slop ~/.claude/skills/stop-slop
+```
+
+**agent-reach** — CLI de recherche web multi-plateforme (Reddit, YouTube, X, GitHub, HN...), zéro clé API. Ce n'est pas une skill :
+
+```bash
+pipx install https://github.com/Panniantong/agent-reach/archive/main.zip
+agent-reach install --env=auto     # vérification read-only par défaut
+# --system seulement après accord explicite de l'utilisateur — jamais tout seul
+```
+
+### Projet — à refaire à chaque nouveau projet
+
+```bash
+npx impeccable install
+```
+
+Puis dans Claude Code : `/impeccable init`.
+
+Ajouter seulement si CE projet en a besoin :
+
+```bash
+npm install remotion     # motion design programmable
+pip install scrapling    # scraping web adaptatif
+```
+
+## Routage — chargé tout seul, sans qu'on te le nomme
+
+### Toujours actifs
+- `superpowers` (`Skill(superpowers:*)`) avant toute tâche de code non triviale — brainstorm, plan, debug, TDD, git
+- `claude-mem` — mémoire cross-session, automatique via ses hooks
+- `context-engineering-collection` (+ ses 17 skills dédiés : `context-fundamentals`, `harness-engineering`, `multi-agent-patterns`, `memory-systems`, etc. — invoquer le plus précis) dès qu'une tâche dépasse quelques fichiers
+- `stop-slop` sur toute prose que je vais lire ou envoyer — jamais sur du code
+
+### Sur déclenchement
+| Contexte | Outil |
 |---|---|
-| `caveman` | compresse les réponses — zéro prose |
-| `Skill(superpowers)` | méta-orchestration (brainstorm, plans, debug, git) |
-| `Skill(context-engineering)` | délègue la lecture lourde aux sous-agents — économie de tokens |
-| MCP `graphify` | knowledge graph mémoire cross-session |
-| MCP `claude-mem` | mémoire persistante cross-session |
+| Frontend, UI | `taste-skill` |
+| Design | `impeccable` (craft / audit / polish / harden) |
+| Marketing, SEO, copy, pricing | une skill de `marketingskills` — choisir la plus précise, ne pas toutes invoquer |
+| Ads | `claude-ads` (`/ads start`, `/ads next`) |
+| Motion design | Remotion |
+| Scraping | Scrapling |
+| Comprendre un repo GitHub, veille | `agent-reach` |
 
-Ce noyau tourne en permanence. Tout le reste ci-dessous est **à la demande** : ne l'invoquer QUE si l'intention le justifie, jamais par réflexe. C'est ce qui rend le setup puissant (accès aux gros outils) sans consommer plus qu'un Claude nu par défaut.
+Remotion, Scrapling et agent-reach ne sont **pas des skills** — rien ne les déclenche tout seul. C'est à toi d'y penser au bon moment.
 
-## À la demande — le router les invoque seul selon l'intention
+## Contexte
 
-**AVANT chaque réponse**, si le hook `⚡ SKILLS REQUIS` / `⚡ SKILLS DISPONIBLES` précise des skills/outils : invoquer IMMÉDIATEMENT. Sinon, ne rien charger de plus que le noyau.
+- Réponds en français.
+- Nova — agence vidéo et pub.
+- Qwillio — agents IA.
+- Tu proposes, tu implémentes, tu testes — sans pause pour demander la permission sur une décision réversible.
 
-| Catégorie | Skill | Outil concret | Trigger |
-|---|---|---|---|
-| Design produit / flow | `product-design` | — | flow utilisateur, onboarding, dashboard, settings, revoir un écran |
-| UI / design / visuel | `product-design` + `impeccable` + `taste-skill` | MCP `magic` (génère les composants) | créer page, composant, hero, layout |
-| Animation / motion | `emil-design-eng` + `review-animations` | — | transition, easing, micro-interaction, "feel weird", polish |
-| Revue / qualité | `code-review` | — | relire code, refactorer, optimiser, inspecter PR |
-| Tests | `tdd-workflow` | MCP `playwright` (E2E) | écrire tests, coverage, spec, E2E |
-| Debug / fix | `systematic-debugging` | MCP `playwright` (repro navigateur) | bug, crash, erreur, ne fonctionne pas |
-| Sécurité | `security` | — | auth, tokens, clés, permissions, vulnérabilités |
-| Plan / architecture | `writing-plans` + `executing-plans` | — | nouvelle feature, conception, comment implémenter |
-| Vérification | `verify` | MCP `playwright` (vérif visuelle) | vérifier avant push, QA, CI, deploy |
-| Discipline agentic | `agentic-practice` | — | avant commit/push, proprement, production-ready |
-| Prose / rédaction | `prose-clean` | — | blog, README, doc, email, "sans IA", réécris |
-| Marketing / growth | `marketing-growth` | — | landing, ad copy, CRO, conversion, funnel, SEO |
-| Recherche web | `web-research` | CLI `agent-reach` (vendor, si présent) sinon WebSearch | compare, benchmark, tendance, "que disent les gens" |
-| Docs / lib précise | — | MCP `context7` | "comment utiliser X", version d'une lib, API précise |
-| Vidéo / ads / motion | `video-generation` | Pika / Hyperframes / Remotion | pub, teaser, spot, motion |
-| Agence Nova | `nova-agency` | — | spot, campagne Meta/Google, site client, SEO local, agent IA |
+## Nouveau projet
 
-**Combiner, pas prioriser.** Chaque skill a un rôle distinct — les invoquer ensemble sans doublon. `product-design` est le hub design ; `impeccable`/`taste-skill` exécutent ; `emil-design-eng`/`review-animations` gèrent le motion.
-
-## Économie de tokens (always-on)
-- **Lecture lourde → sous-agent.** Recherche/exploration/mapping : déléguer via Explore/Task, garder la conclusion, pas les extraits bruts. Voir `Skill(context-engineering)`.
-- Ne pas relire un fichier déjà édité pour « vérifier » (le harness confirme l'édition).
-- Ne pas relancer une recherche déjà déléguée — attendre le résultat.
-- `caveman` compresse l'output. Réponses courtes, zéro prose de remplissage.
-- Les MCP lourds (`magic`, `playwright`, `context7`) ne se chargent que sur intention précise (table ci-dessus) — jamais mentionnés hors contexte.
-
-## Self-learning
-
-Les learnings accumulés sont injectés automatiquement. Les appliquer sans question.
-
-## Output
-- Réponses courtes. Pas de prose. Pas de résumé sauf demandé. Zéro commentaire code sauf WHY non-obvious.
-
-## MCPs — deux niveaux
-
-**Mémoire (toujours utiles, coût faible) :**
-- `claude-mem` → mémoire persistante cross-session
-- `graphify` → knowledge graph
-
-**Outils lourds (invoqués sur intention précise par le router — jamais par défaut) :**
-- `magic` → composants 21st.dev — seulement si design/frontend détecté
-- `playwright` → browser/E2E — seulement si test/screenshot/navigation détecté
-- `context7` → docs live — seulement si lib/framework précis nommé
-
-## Vidéo / Ads
-- `Pika` → ads IA, teaser, vidéo depuis prompt. API key: `$PIKA_API_KEY`
-- `Hyperframes` → motion design HTML→vidéo. CLI: `npx hyperframes render`
-- Voir `Skill(video-generation)` pour workflow complet
-
-## Design — interdictions absolues
-- NO `transition-all` / `background-clip:text` / Inter font / glassmorphism
-- Framer Motion easing: `cubic-bezier(0.16,1,0.3,1)`. Press: `scale(0.97)`.
-
-## Commits
-`feat|fix|refactor: desc` — Pas de Co-Authored-By.
+```bash
+curl -fsSL https://raw.githubusercontent.com/Makooff/SuperClaude/main/CLAUDE.md -o CLAUDE.md
+```
